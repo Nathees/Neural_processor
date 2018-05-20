@@ -70,9 +70,10 @@
 `include "max_2_squeeze_top/average_fifo/average_fifo.v"
 `include "max_2_squeeze_top/output_fifo/output_fifo.v"
 
-`include "temp_sources/temp_add_1.v"
-`include "temp_sources/temp_add_2.v"
-`include "temp_sources/temp_mult.v"
+`include "float_arith/add/add_12.v"
+`include "float_arith/add/add_en_12.v"
+`include "float_arith/mult/mult_12.v"
+`include "float_arith/multiplier/multiplier_7x7.v"
 
 `define EOF -1
 
@@ -228,26 +229,25 @@ module squeezenet_top_sim(
 		clk_i = 0;
 		rst_n_i = 0;
 
-		layer = $fopen("input_layer.bin", "rb");
-		kernal_3x3 = $fopen("ker_3x3.bin", "rb");
-		kernal_1x1 = $fopen("ker_1x1.bin", "rb");
-		exp_bash = $fopen("bias.bin", "rb");
-		squeeze = $fopen("sq_ker.bin", "rb");
-		squ_bash = $fopen("sq_bias.bin", "rb");
+		layer = $fopen("../sim_verify/input_layer.bin", "rb");
+		kernal_3x3 = $fopen("../sim_verify/ker_3x3.bin", "rb");
+		kernal_1x1 = $fopen("../sim_verify/ker_1x1.bin", "rb");
+		exp_bash = $fopen("../sim_verify/bias.bin", "rb");
+		squeeze = $fopen("../sim_verify/sq_ker.bin", "rb");
+		squ_bash = $fopen("../sim_verify/sq_bias.bin", "rb");
 
-		a = $fgetc(layer);
 		b = $fgetc(kernal_3x3);
 		c = $fgetc(kernal_1x1);
 		d = $fgetc(exp_bash);
 		e = $fgetc(squeeze);
 		f = $fgetc(squ_bash);
 
-		//out_3x3 = $fopen("exp_3.bin", "rb");
-		//out_1x1 = $fopen("exp_1.bin", "rb");
-		//max_3x3 = $fopen("pool_3.bin", "rb");
-		//max_1x1 = $fopen("pool_1.bin", "rb");
-		avg_out = $fopen("av_pool_out.bin", "rb");
-		squ_out = $fopen("sq_out.bin", "rb");
+		//out_3x3 = $fopen("../sim_verify/exp_3.bin", "rb");
+		//out_1x1 = $fopen("../sim_verify/exp_1.bin", "rb");
+		//max_3x3 = $fopen("../sim_verify/pool_3.bin", "rb");
+		//max_1x1 = $fopen("../sim_verify/pool_1.bin", "rb");
+		avg_out = $fopen("../sim_verify/av_pool_out.bin", "rb");
+		squ_out = $fopen("../sim_verify/sq_out.bin", "rb");
 
 		#100
 		@(posedge clk_i)
@@ -281,7 +281,7 @@ module squeezenet_top_sim(
 	assign max_tot_addr_space_i = 94; //206; //30;
 
 	assign squ_repeat_en_i = 0;
-	assign avg_en_i = 1;
+	assign avg_en_i = 0;
 	assign tot_squ_ker_addr_limit_i = 511; //511; //255;
 	assign one_squ_ker_addr_limit_i = 8; //8; //8;
 	assign squ_kernals_63_i = 31; //31; //15;
@@ -296,6 +296,18 @@ module squeezenet_top_sim(
 		end else begin
 			layer_ready_i <= 1;
 		end
+	end
+	initial begin
+		a = $fgetc(layer);
+		layer_data_i[71:64] = a;
+		layer_data_i[63:56] = $fgetc(layer);
+		layer_data_i[55:48] = $fgetc(layer);
+		layer_data_i[47:40] = $fgetc(layer);
+		layer_data_i[39:32] = $fgetc(layer);
+		layer_data_i[31:24] = $fgetc(layer);
+		layer_data_i[23:16] = $fgetc(layer);
+		layer_data_i[15:08] = $fgetc(layer);
+		layer_data_i[07:00] = $fgetc(layer);
 	end
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
