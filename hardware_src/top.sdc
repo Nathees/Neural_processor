@@ -1,0 +1,1 @@
+create_clock -name hps_clk -period 10.000 -waveform {0 5} [get_nets {soc_system_inst|hps_0|fpga_interfaces|h2f_user0_clk[0]}]
