@@ -1,4 +1,4 @@
-module mult_12(
+module float_mult_12(
 
 	input 					clk_i,
 	input 					rst_n_i,
@@ -24,7 +24,7 @@ module mult_12(
 	wire        [6:0]       w_mult_b;
 	wire        [7:0]       w_mult_ab;
 	
-	wire 			[12:0] 		w_mult_result;
+	wire 		[13:0] 		w_mult_result;
 
 	//------------ first pipeline
 	reg 					r_sgn_x1;
@@ -37,6 +37,8 @@ module mult_12(
 
 	reg 					r_incr_exp_flag;
 	reg 					r_multiply_by_zero_2;
+	reg 					r_zero_result_flag;
+	reg 					r_exp_eq_14;
 
 	//------------ third satge pipe line
 	reg 		[5:0] 		r_mant_x;
@@ -64,17 +66,16 @@ module mult_12(
 	.datab			(w_mult_b),
 	.result			(w_mult_result)
 	);
-	assign w_mult_ab = w_mult_result[12:5];
+	assign w_mult_ab = w_mult_result[13:6];
 
 	// xilinx instatiation
-	 /*mult_8x8 mult_8x8_inst
-   	(
-	     .clk_i			(clk_i),
-	     .SCLR              (~rst_n_i),
-	     .A 				(w_mult_a),
-	     .B 				(w_mult_b),
-	     .P 				(w_mult_ab)
-   	);*/
+	 // multiplier_7x7 multiplier_7x7_inst
+  //  	(
+	 //     .CLK			     (clk_i),
+	 //     .A 				(w_mult_a),
+	 //     .B 				(w_mult_b),
+	 //     .P 				(w_mult_result)
+  //  	);
 
 	// assuming two stage pipe line for mutiplier
 	//----------- first pipe line
@@ -130,7 +131,7 @@ module mult_12(
 	always @(posedge clk_i) begin
 		if(~rst_n_i) begin
 			r_incr_exp_flag <= 0;
-		end else if(r_exp_x1 >= 15 || r_exp_x1 < 31) begin
+		end else if(r_exp_x1 >= 14 && r_exp_x1 < 46) begin
 			r_incr_exp_flag <= 1;
 		end else begin
 			r_incr_exp_flag <= 0;
@@ -146,20 +147,47 @@ module mult_12(
 		end
 	end
 
+	always @(posedge clk_i) begin : proc_r_zero_result_flag
+		if(~rst_n_i) begin
+			r_zero_result_flag <= 0;
+		end else if(r_exp_x1 <= 14) begin
+			r_zero_result_flag <= 1;
+		end else begin
+			r_zero_result_flag <= 0;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_exp_eq_14
+		if(~rst_n_i) begin
+			r_exp_eq_14 <= 0;
+		end else if(r_exp_x1 == 14)begin
+			r_exp_eq_14 <= 1;
+		end else begin
+			r_exp_eq_14 <= 0;
+		end
+	end
+
 	//----- third stage pipe line
 	always @(posedge clk_i) begin : proc_r_mant_x
-		if(~rst_n_i || r_multiply_by_zero_2) begin
+		if(~rst_n_i || r_multiply_by_zero_2 || (r_zero_result_flag & ~(r_incr_exp_flag & w_mult_ab[7:7]))) begin
 			r_mant_x <= 0;
-			r_exp_x <= 0;
 			r_sgn_x <= 0;
-		end else if(w_mult_ab[7:7] && r_incr_exp_flag) begin
+		end else if(w_mult_ab[7:7]) begin
 			r_mant_x <= w_mult_ab[6:1];
-			r_exp_x <= r_exp_x2 + 1;
 			r_sgn_x <= r_sgn_x2;
 		end else begin
 			r_mant_x <= w_mult_ab[5:0];
-			r_exp_x <= r_exp_x2;
 			r_sgn_x <= r_sgn_x2;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_exp_x
+		if(~rst_n_i || r_multiply_by_zero_2 || (r_zero_result_flag & ~(r_incr_exp_flag & w_mult_ab[7:7]))) begin
+			r_exp_x <= 0;
+		end else if(w_mult_ab[7:7] && r_incr_exp_flag && ~r_exp_eq_14) begin
+			r_exp_x <= r_exp_x2 + 1;
+		end else begin
+			r_exp_x <= r_exp_x2;
 		end
 	end
 
