@@ -88,17 +88,17 @@ module sim_float_12 ();
     end
 
     // bits to real
-    assign real_a_bits[63:63] = fp_a[11:11];
-    assign real_a_bits[62:52] = fp_a[10:6] + 1023 - 15;
-    assign real_a_bits[51:0] = {fp_a[5:0] , 46'b0};
+    assign real_a_bits[63:63] = (fp_a == 0)? 0 : fp_a[11:11];
+    assign real_a_bits[62:52] = (fp_a == 0)? 0 : fp_a[10:6] + 1023 - 15;
+    assign real_a_bits[51:0] = (fp_a == 0)? 0 : {fp_a[5:0] , 46'b0};
 
-    assign real_b_bits[63:63] = fp_b[11:11];
-    assign real_b_bits[62:52] = fp_b[10:6] + 1023 - 15;
-    assign real_b_bits[51:0] = {fp_b[5:0] , 46'b0};
+    assign real_b_bits[63:63] = (fp_b == 0) ? 0 : fp_b[11:11];
+    assign real_b_bits[62:52] = (fp_b == 0) ? 0 : fp_b[10:6] + 1023 - 15;
+    assign real_b_bits[51:0] = (fp_b == 0) ? 0 : {fp_b[5:0] , 46'b0};
 
-    assign real_x_bits[63:63] = fp_x[11:11];
-    assign real_x_bits[62:52] = fp_x[10:6] + 1023 - 15;
-    assign real_x_bits[51:0] = {fp_x[5:0] , 46'b0};
+    assign real_x_bits[63:63] = (fp_x == 0 ) ? 0 : fp_x[11:11];
+    assign real_x_bits[62:52] = (fp_x == 0 ) ? 0 : fp_x[10:6] + 1023 - 15;
+    assign real_x_bits[51:0] = (fp_x == 0 ) ? 0 : {fp_x[5:0] , 46'b0};
 
     always_ff @(posedge clk) begin : proc_real_a_b
     	if(~reset_n) begin
