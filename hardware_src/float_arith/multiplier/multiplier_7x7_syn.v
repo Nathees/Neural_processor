@@ -34,7 +34,7 @@
 //agreement for further details.
 
 
-//lpm_mult DEDICATED_MULTIPLIER_CIRCUITRY="YES" DEVICE_FAMILY="Cyclone V" LPM_PIPELINE=2 LPM_REPRESENTATION="UNSIGNED" LPM_WIDTHA=7 LPM_WIDTHB=7 LPM_WIDTHP=13 MAXIMIZE_SPEED=5 clock dataa datab result
+//lpm_mult DEDICATED_MULTIPLIER_CIRCUITRY="YES" DEVICE_FAMILY="Cyclone V" LPM_PIPELINE=2 LPM_REPRESENTATION="UNSIGNED" LPM_WIDTHA=7 LPM_WIDTHB=7 LPM_WIDTHP=14 MAXIMIZE_SPEED=5 clock dataa datab result
 //VERSION_BEGIN 16.1 cbx_cycloneii 2016:10:24:15:04:16:SJ cbx_lpm_add_sub 2016:10:24:15:04:16:SJ cbx_lpm_mult 2016:10:24:15:04:16:SJ cbx_mgl 2016:10:24:15:05:03:SJ cbx_nadder 2016:10:24:15:04:16:SJ cbx_padd 2016:10:24:15:04:16:SJ cbx_stratix 2016:10:24:15:04:16:SJ cbx_stratixii 2016:10:24:15:04:16:SJ cbx_util_mgl 2016:10:24:15:04:16:SJ  VERSION_END
 // synthesis VERILOG_INPUT_VERSION VERILOG_2001
 // altera message_off 10463
@@ -53,7 +53,7 @@ module  multiplier_7x7_mult
 	input   clock;
 	input   [6:0]  dataa;
 	input   [6:0]  datab;
-	output   [12:0]  result;
+	output   [13:0]  result;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
@@ -64,7 +64,7 @@ module  multiplier_7x7_mult
 
 	reg  [6:0]  dataa_input_reg;
 	reg  [6:0]  datab_input_reg;
-	reg  [12:0]  result_output_reg;
+	reg  [13:0]  result_output_reg;
 	wire [6:0]    dataa_wire;
 	wire [6:0]    datab_wire;
 	wire [13:0]    result_wire;
@@ -87,7 +87,7 @@ module  multiplier_7x7_mult
 		result_output_reg = 0;
 	// synopsys translate_on
 	always @(posedge clock)
-		result_output_reg <= result_wire[13:1];
+		result_output_reg <= result_wire[13:0];
 
 	assign dataa_wire = dataa_input_reg;
 	assign datab_wire = datab_input_reg;
@@ -110,10 +110,10 @@ module multiplier_7x7 (
 	input	  clock;
 	input	[6:0]  dataa;
 	input	[6:0]  datab;
-	output	[12:0]  result;
+	output	[13:0]  result;
 
-	wire [12:0] sub_wire0;
-	wire [12:0] result = sub_wire0[12:0];
+	wire [13:0] sub_wire0;
+	wire [13:0] result = sub_wire0[13:0];
 
 	multiplier_7x7_mult	multiplier_7x7_mult_component (
 				.clock (clock),
@@ -126,7 +126,7 @@ endmodule
 // ============================================================
 // CNX file retrieval info
 // ============================================================
-// Retrieval info: PRIVATE: AutoSizeResult NUMERIC "0"
+// Retrieval info: PRIVATE: AutoSizeResult NUMERIC "1"
 // Retrieval info: PRIVATE: B_isConstant NUMERIC "0"
 // Retrieval info: PRIVATE: ConstantB NUMERIC "0"
 // Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
@@ -138,7 +138,7 @@ endmodule
 // Retrieval info: PRIVATE: ValidConstant NUMERIC "0"
 // Retrieval info: PRIVATE: WidthA NUMERIC "7"
 // Retrieval info: PRIVATE: WidthB NUMERIC "7"
-// Retrieval info: PRIVATE: WidthP NUMERIC "13"
+// Retrieval info: PRIVATE: WidthP NUMERIC "14"
 // Retrieval info: PRIVATE: aclr NUMERIC "0"
 // Retrieval info: PRIVATE: clken NUMERIC "0"
 // Retrieval info: PRIVATE: new_diagram STRING "1"
@@ -150,15 +150,15 @@ endmodule
 // Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_MULT"
 // Retrieval info: CONSTANT: LPM_WIDTHA NUMERIC "7"
 // Retrieval info: CONSTANT: LPM_WIDTHB NUMERIC "7"
-// Retrieval info: CONSTANT: LPM_WIDTHP NUMERIC "13"
+// Retrieval info: CONSTANT: LPM_WIDTHP NUMERIC "14"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL "clock"
 // Retrieval info: USED_PORT: dataa 0 0 7 0 INPUT NODEFVAL "dataa[6..0]"
 // Retrieval info: USED_PORT: datab 0 0 7 0 INPUT NODEFVAL "datab[6..0]"
-// Retrieval info: USED_PORT: result 0 0 13 0 OUTPUT NODEFVAL "result[12..0]"
+// Retrieval info: USED_PORT: result 0 0 14 0 OUTPUT NODEFVAL "result[13..0]"
 // Retrieval info: CONNECT: @clock 0 0 0 0 clock 0 0 0 0
 // Retrieval info: CONNECT: @dataa 0 0 7 0 dataa 0 0 7 0
 // Retrieval info: CONNECT: @datab 0 0 7 0 datab 0 0 7 0
-// Retrieval info: CONNECT: result 0 0 13 0 @result 0 0 13 0
+// Retrieval info: CONNECT: result 0 0 14 0 @result 0 0 14 0
 // Retrieval info: GEN_FILE: TYPE_NORMAL multiplier_7x7.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL multiplier_7x7.inc FALSE
 // Retrieval info: GEN_FILE: TYPE_NORMAL multiplier_7x7.cmp FALSE

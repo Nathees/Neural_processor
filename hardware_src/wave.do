@@ -39,11 +39,14 @@ add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_in
 add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/w_mult_a}
 add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/w_mult_b}
 add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/w_mult_result}
+add wave -noupdate /squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/last_squ_add_inst/final_bash_add_inst/data_1_i
+add wave -noupdate /squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/last_squ_add_inst/final_bash_add_inst/data_2_i
+add wave -noupdate /squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/last_squ_add_inst/final_bash_add_inst/data_sum_o
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {21027 ps} 0}
+WaveRestoreCursors {{Cursor 1} {62 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 489
-configure wave -valuecolwidth 243
+configure wave -valuecolwidth 166
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
 configure wave -snapdistance 10
@@ -56,4 +59,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {20853 ps} {21201 ps}
+WaveRestoreZoom {0 ps} {788 ps}

@@ -41,14 +41,14 @@ module multiplier_7x7 (
 	input	  clock;
 	input	[6:0]  dataa;
 	input	[6:0]  datab;
-	output	[12:0]  result;
+	output	[13:0]  result;
 
 endmodule
 
 // ============================================================
 // CNX file retrieval info
 // ============================================================
-// Retrieval info: PRIVATE: AutoSizeResult NUMERIC "0"
+// Retrieval info: PRIVATE: AutoSizeResult NUMERIC "1"
 // Retrieval info: PRIVATE: B_isConstant NUMERIC "0"
 // Retrieval info: PRIVATE: ConstantB NUMERIC "0"
 // Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
@@ -60,7 +60,7 @@ endmodule
 // Retrieval info: PRIVATE: ValidConstant NUMERIC "0"
 // Retrieval info: PRIVATE: WidthA NUMERIC "7"
 // Retrieval info: PRIVATE: WidthB NUMERIC "7"
-// Retrieval info: PRIVATE: WidthP NUMERIC "13"
+// Retrieval info: PRIVATE: WidthP NUMERIC "14"
 // Retrieval info: PRIVATE: aclr NUMERIC "0"
 // Retrieval info: PRIVATE: clken NUMERIC "0"
 // Retrieval info: PRIVATE: new_diagram STRING "1"
@@ -72,15 +72,15 @@ endmodule
 // Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_MULT"
 // Retrieval info: CONSTANT: LPM_WIDTHA NUMERIC "7"
 // Retrieval info: CONSTANT: LPM_WIDTHB NUMERIC "7"
-// Retrieval info: CONSTANT: LPM_WIDTHP NUMERIC "13"
+// Retrieval info: CONSTANT: LPM_WIDTHP NUMERIC "14"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL "clock"
 // Retrieval info: USED_PORT: dataa 0 0 7 0 INPUT NODEFVAL "dataa[6..0]"
 // Retrieval info: USED_PORT: datab 0 0 7 0 INPUT NODEFVAL "datab[6..0]"
-// Retrieval info: USED_PORT: result 0 0 13 0 OUTPUT NODEFVAL "result[12..0]"
+// Retrieval info: USED_PORT: result 0 0 14 0 OUTPUT NODEFVAL "result[13..0]"
 // Retrieval info: CONNECT: @clock 0 0 0 0 clock 0 0 0 0
 // Retrieval info: CONNECT: @dataa 0 0 7 0 dataa 0 0 7 0
 // Retrieval info: CONNECT: @datab 0 0 7 0 datab 0 0 7 0
-// Retrieval info: CONNECT: result 0 0 13 0 @result 0 0 13 0
+// Retrieval info: CONNECT: result 0 0 14 0 @result 0 0 14 0
 // Retrieval info: GEN_FILE: TYPE_NORMAL multiplier_7x7.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL multiplier_7x7.inc FALSE
 // Retrieval info: GEN_FILE: TYPE_NORMAL multiplier_7x7.cmp FALSE
