@@ -1,4 +1,7 @@
-module sim_float_12 ();
+`include "mult_12.v"
+`include "../multiplier/multiplier_7x7.v"
+
+module sim_float_mult();
 
 // import "DPI-C" pure function real float_add_c(real a, real b); 
 
@@ -50,7 +53,7 @@ module sim_float_12 ();
 	// );
 
 	// module instatiation
-	float_mult_12 float_mult_12_inst(
+	mult_12 mult_12_inst(
 		.clk_i(clk),
 		.rst_n_i(reset_n),
 		.data_1_i(fp_a),

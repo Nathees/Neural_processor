@@ -1,4 +1,4 @@
-module float_mult_12(
+module mult_12(
 
 	input 					clk_i,
 	input 					rst_n_i,
