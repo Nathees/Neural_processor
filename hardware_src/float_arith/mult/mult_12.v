@@ -29,10 +29,14 @@ module mult_12(
 	//------------ first pipeline
 	reg 					r_sgn_x1;
 	reg 		[6:0]  		r_exp_x1;
+	reg 					r_multiply_by_zero_1;
 
 	//------------ second pipeline
 	reg 					r_sgn_x2;
 	reg 		[5:0]  		r_exp_x2;
+
+	reg 					r_incr_exp_flag;
+	reg 					r_multiply_by_zero_2;
 
 	//------------ third satge pipe line
 	reg 		[5:0] 		r_mant_x;
@@ -90,6 +94,17 @@ module mult_12(
 		end
 	end
 
+	
+	always @(posedge clk_i) begin
+		if(~rst_n_i) begin
+			r_multiply_by_zero_1 <= 0;
+		end else if( data_1_i == 0 || data_2_i == 0)begin
+			r_multiply_by_zero_1 <= 1;
+		end else begin
+			r_multiply_by_zero_1 <= 0;
+		end
+	end
+
 	//------ second pipe line
 	always @(posedge clk_i) begin : proc_r_sgn_x2
 		if(~rst_n_i) begin
@@ -102,18 +117,42 @@ module mult_12(
 	always @(posedge clk_i) begin : proc_r_exp_x2
 		if(~rst_n_i) begin
 			r_exp_x2 <= 0;
-		end else begin
+		end else if(r_exp_x1 >= 46) begin
+			r_exp_x2 <= 31;
+		end else if(r_exp_x1 >= 15) begin
 			r_exp_x2 <= r_exp_x1 - 15;   // subtracting bias
+		end else begin
+			r_exp_x2 <= 0;
+		end
+	end
+
+	
+	always @(posedge clk_i) begin
+		if(~rst_n_i) begin
+			r_incr_exp_flag <= 0;
+		end else if(r_exp_x1 >= 15 || r_exp_x1 < 31) begin
+			r_incr_exp_flag <= 1;
+		end else begin
+			r_incr_exp_flag <= 0;
+		end
+	end 
+
+	
+	always @(posedge clk_i) begin 
+		if(~rst_n_i) begin
+			r_multiply_by_zero_1 <= 0;
+		end else begin
+			r_multiply_by_zero_2 <= r_multiply_by_zero_1;
 		end
 	end
 
 	//----- third stage pipe line
 	always @(posedge clk_i) begin : proc_r_mant_x
-		if(~rst_n_i) begin
+		if(~rst_n_i || r_multiply_by_zero_2) begin
 			r_mant_x <= 0;
 			r_exp_x <= 0;
 			r_sgn_x <= 0;
-		end else if(w_mult_ab[7:7]) begin
+		end else if(w_mult_ab[7:7] && r_incr_exp_flag) begin
 			r_mant_x <= w_mult_ab[6:1];
 			r_exp_x <= r_exp_x2 + 1;
 			r_sgn_x <= r_sgn_x2;

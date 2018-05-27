@@ -6,24 +6,9 @@ dep = 16
 ker = 64
 sq_ker = 32
 pool_en = 0
-av_pool_en = 0
+av_pool_en = 1
 random = 0 #TODO
 sq_rep = 0 # repete squze kernl for last layer
-
-###########quantization weight###########
-from ctypes import *
-def q(x):
-    bits = cast(pointer(c_float(x)), POINTER(c_int32)).contents.value
-    bits = bits + 0x100000; # round off
-    bits=(bits>>21)<<21
-    return cast(pointer(c_int32(bits)), POINTER(c_float)).contents.value
-q8 = np.vectorize(q)
-def qq(x):
-    bits = cast(pointer(c_float(x)), POINTER(c_int32)).contents.value
-    # bits = bits + 0x100000;
-    bits=(bits>>17)<<17
-    return cast(pointer(c_int32(bits)), POINTER(c_float)).contents.value
-q12 = np.vectorize(qq)
 
 #######################         Input image
 in_l = np.zeros(dim_p*dim_p*dep, dtype='uint8').reshape((dim_p,dim_p,dep))
@@ -43,7 +28,7 @@ for z in range(0,dim):
                 f_in.write(str(lis)[1:-1]+'\n')
                 f_in_b.write(bytearray(lis))
 ########################        expand kernels 
-ker_l_1 = np.zeros(ker*dep, dtype='uint8').reshape((ker,dep))
+ker_l_1 = np.arange(ker*dep, dtype='uint8').reshape((ker,dep))
 # print(ker_l_1);print("________")
 f_k_1 = open("ker_1x1.txt","w")
 f_k_1_b = open("ker_1x1.bin","wb")
@@ -52,7 +37,7 @@ for z in range(0,dep):
     f_k_1_b.write(bytearray(lis))
     f_k_1.write(str(lis)[1:-1]+'\n')
 
-ker_l_3 = np.zeros(ker*dep*9, dtype='uint8').reshape((ker,dep,9))
+ker_l_3 = np.arange(ker*dep*9, dtype='uint8').reshape((ker,dep,9))
 # print(ker_l_3[0,0,:]);print("________")
 f_k_3 = open("ker_3x3.txt","w")
 f_k_3_b = open("ker_3x3.bin","wb")
@@ -68,10 +53,8 @@ for m in range(0,dim): # repet 3x3 kernel
             f_k_3_b.write(bytearray(nin))
             f_k_3.write(str(nin)[1:-1]+'\n')
 ########################        exapnd bias
-# bis_1 = np.full(ker,0x3c,dtype='uint8')
-bis_1 = np.full(ker,0x00,dtype='uint8')
-# bis_3 = np.full(ker,0x3c,dtype='uint8')
-bis_3 = np.full(ker,0x00,dtype='uint8')
+bis_1 = np.arange(ker,dtype='uint8')
+bis_3 = np.arange(ker,dtype='uint8')
 b_bis = open("bias.txt","w")
 b_bis_b = open("bias.bin","wb")
 # print(bis_1)
@@ -201,7 +184,7 @@ else:
 
 ########################   squ kernel
 if random == 0:
-    sq_ker_l = np.zeros(sq_ker*dep, dtype='uint8').reshape((sq_ker,dep))
+    sq_ker_l = np.arange(sq_ker*dep, dtype='uint8').reshape((sq_ker,dep))
 else:
     sq_ker_l = np.random.randint(low = 0, high = 255, size = (sq_ker,dep), dtype='uint8')
 
@@ -226,7 +209,7 @@ for r in range(0,rep_no):
     
 
 #######################    squ bias
-sq_bis_1 = np.full(sq_ker,0x3c,dtype='uint8')
+sq_bis_1 = np.arange(sq_ker,dtype='uint8')
 f_sq_bis = open("sq_bias.txt","w")
 f_sq_bis_b = open("sq_bias.bin","wb")
 
@@ -261,7 +244,6 @@ for r in range(0,dim_sq):
         f_sq_out_1.write(str(lis)[1:-1]+'\n')
 
 ########################     avg pool
-sq_bis_1 = np.ones(sq_ker,dtype='uint8') # actual value for convoution
 if av_pool_en == 1:
     av_pool = np.sum(sq_out,axis = (1,2), dtype = 'uint8')
     f_av_out_1 = open("av_pool_out.txt","w")

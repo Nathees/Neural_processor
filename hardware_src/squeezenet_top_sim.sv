@@ -75,6 +75,10 @@
 `include "float_arith/mult/mult_12.v"
 `include "float_arith/multiplier/multiplier_7x7.v"
 
+//`include "float_arith/int/add_12.v"
+//`include "float_arith/int/add_en_12.v"
+//`include "float_arith/int/mult_12.v"
+//
 `define EOF -1
 
 module squeezenet_top_sim(
@@ -236,6 +240,7 @@ module squeezenet_top_sim(
 		squeeze = $fopen("../sim_verify/sq_ker.bin", "rb");
 		squ_bash = $fopen("../sim_verify/sq_bias.bin", "rb");
 
+		//a = $fgetc(layer);
 		b = $fgetc(kernal_3x3);
 		c = $fgetc(kernal_1x1);
 		d = $fgetc(exp_bash);
@@ -281,7 +286,7 @@ module squeezenet_top_sim(
 	assign max_tot_addr_space_i = 94; //206; //30;
 
 	assign squ_repeat_en_i = 0;
-	assign avg_en_i = 0;
+	assign avg_en_i = 0; //1;
 	assign tot_squ_ker_addr_limit_i = 511; //511; //255;
 	assign one_squ_ker_addr_limit_i = 8; //8; //8;
 	assign squ_kernals_63_i = 31; //31; //15;
@@ -298,8 +303,7 @@ module squeezenet_top_sim(
 		end
 	end
 	initial begin
-		a = $fgetc(layer);
-		layer_data_i[71:64] = a;
+		layer_data_i[71:64] = $fgetc(layer);
 		layer_data_i[63:56] = $fgetc(layer);
 		layer_data_i[55:48] = $fgetc(layer);
 		layer_data_i[47:40] = $fgetc(layer);
@@ -308,6 +312,7 @@ module squeezenet_top_sim(
 		layer_data_i[23:16] = $fgetc(layer);
 		layer_data_i[15:08] = $fgetc(layer);
 		layer_data_i[07:00] = $fgetc(layer);
+		a = $fgetc(layer);
 	end
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
@@ -342,7 +347,7 @@ module squeezenet_top_sim(
 		if(~rst_n_i) begin
 			fifo_exp_3x3_wr_data_i <= 0;
 		end
-		else if(fifo_exp_3x3_data_count_o < 100 && r_start_count == 10 && wr_en_count == 10) begin // && wr_en_count == 10
+		else if(fifo_exp_3x3_data_count_o < 100 && r_start_count == 10) begin // && wr_en_count == 10
 			if(b != `EOF) begin
 				fifo_exp_3x3_wr_data_i[63:56] <= b; //$fgetc(kernal_3x3);
 				fifo_exp_3x3_wr_data_i[55:48] <= $fgetc(kernal_3x3);
@@ -360,14 +365,14 @@ module squeezenet_top_sim(
 		if(~rst_n_i) begin
 			fifo_exp_3x3_wr_en_i <= 0;
 		end else begin
-			fifo_exp_3x3_wr_en_i <= (fifo_exp_3x3_data_count_o < 100 && r_start_count == 10 && wr_en_count == 10); //  && wr_en_count == 10
+			fifo_exp_3x3_wr_en_i <= (fifo_exp_3x3_data_count_o < 100 && r_start_count == 10); //  && wr_en_count == 10
 		end
 	end
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
 			fifo_exp_1x1_wr_data_i <= 0;
 		end
-		else if(fifo_exp_1x1_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30) begin  //&& wr_en_count == 30
+		else if(fifo_exp_1x1_data_count_o < 100 && r_start_count == 10) begin  //&& wr_en_count == 30
 			if(c != `EOF) begin
 				fifo_exp_1x1_wr_data_i[31:24] <= c; //$fgetc(kernal_1x1);
 				fifo_exp_1x1_wr_data_i[23:16] <= $fgetc(kernal_1x1);
@@ -386,14 +391,14 @@ module squeezenet_top_sim(
 		if(~rst_n_i) begin
 			fifo_exp_1x1_wr_en_i <= 0;
 		end else begin
-			fifo_exp_1x1_wr_en_i <= (fifo_exp_1x1_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30); // && wr_en_count == 30
+			fifo_exp_1x1_wr_en_i <= (fifo_exp_1x1_data_count_o < 100 && r_start_count == 10); // && wr_en_count == 30
 		end
 	end
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
 			fifo_exp_bash_wr_data_i <= 0;
 		end
-		else if(fifo_exp_bash_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30) begin  //&& wr_en_count == 30
+		else if(fifo_exp_bash_data_count_o < 100 && r_start_count == 10) begin  //&& wr_en_count == 30
 			if(d != `EOF) begin
 				fifo_exp_bash_wr_data_i[63:56] <= d;
 				fifo_exp_bash_wr_data_i[55:48] <= $fgetc(exp_bash);
@@ -411,14 +416,14 @@ module squeezenet_top_sim(
 		if(~rst_n_i) begin
 			fifo_exp_bash_wr_en_i <= 0;
 		end else begin
-			fifo_exp_bash_wr_en_i <= (fifo_exp_bash_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30); // && wr_en_count == 30
+			fifo_exp_bash_wr_en_i <= (fifo_exp_bash_data_count_o < 100 && r_start_count == 10); // && wr_en_count == 30
 		end
 	end
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
 			fifo_squeeze_wr_data_i <= 0;
 		end
-		else if(fifo_squeeze_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30) begin  //&& wr_en_count == 30
+		else if(fifo_squeeze_data_count_o < 100 && r_start_count == 10) begin  //&& wr_en_count == 30
 			if(e != `EOF) begin
 				fifo_squeeze_wr_data_i[63:56] <= e;
 				fifo_squeeze_wr_data_i[55:48] <= $fgetc(squeeze);
@@ -436,14 +441,14 @@ module squeezenet_top_sim(
 		if(~rst_n_i) begin
 			fifo_squeeze_wr_en_i <= 0;
 		end else begin
-			fifo_squeeze_wr_en_i <= (fifo_squeeze_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30); // && wr_en_count == 30
+			fifo_squeeze_wr_en_i <= (fifo_squeeze_data_count_o < 100 && r_start_count == 10); // && wr_en_count == 30
 		end
 	end
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
 			fifo_squ_bash_wr_data_i <= 0;
 		end
-		else if(fifo_squ_bash_data_count_o < 100 && r_start_count == 10 && wr_en_count == 30) begin  //&& wr_en_count == 30
+		else if(fifo_squ_bash_data_count_o < 100 && r_start_count == 10) begin  //&& wr_en_count == 30
 			if(f != `EOF) begin
 				fifo_squ_bash_wr_data_i[07:00] <= f;
 				fifo_squ_bash_wr_data_i[15:08] <= $fgetc(squ_bash); 
@@ -461,7 +466,7 @@ module squeezenet_top_sim(
 		if(~rst_n_i) begin
 			fifo_squ_bash_wr_en_i <= 0;
 		end else begin
-			fifo_squ_bash_wr_en_i <= (fifo_squ_bash_data_count_o < 10 && r_start_count == 10 && wr_en_count == 30); // && wr_en_count == 30
+			fifo_squ_bash_wr_en_i <= (fifo_squ_bash_data_count_o < 10 && r_start_count == 10); // && wr_en_count == 30
 		end
 	end
 
@@ -498,7 +503,7 @@ module squeezenet_top_sim(
 
 	always_ff @(posedge clk_i) begin 
 		if(chk_out && r_squ_out != fifo_out_rd_data_o && ~avg_en_i) begin
-			$finish;
+			//$finish;
 		end
 	end
 	always_ff @(posedge clk_i) begin 

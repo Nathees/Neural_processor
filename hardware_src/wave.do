@@ -33,8 +33,14 @@ add wave -noupdate /squeezenet_top_sim/squeezenet_top_inst/fifo_out_rd_en_i
 add wave -noupdate /squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/output_data_o
 add wave -noupdate /squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/output_flag_o
 add wave -noupdate -divider {New Divider}
+add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/data_1_i}
+add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/data_2_i}
+add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/data_mult_o}
+add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/w_mult_a}
+add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/w_mult_b}
+add wave -noupdate {/squeezenet_top_sim/squeezenet_top_inst/max_2_squeeze_top_inst/squeeze_convolution_inst/MULT_3X3[7]/temp_mult_3x3_inst/w_mult_result}
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {240232500 ps} 0}
+WaveRestoreCursors {{Cursor 1} {21027 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 489
 configure wave -valuecolwidth 243
@@ -50,4 +56,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {238995958 ps} {240419042 ps}
+WaveRestoreZoom {20853 ps} {21201 ps}
