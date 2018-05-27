@@ -51,11 +51,11 @@ module sim_float_12 ();
 
 	// module instatiation
 	float_mult_12 float_mult_12_inst(
-		.clk(clk),
-		.reset_n(reset_n),
-		.fp_a(fp_a),
-		.fp_b(fp_b),
-		.fp_x(fp_x)
+		.clk_i(clk),
+		.rst_n_i(reset_n),
+		.data_1_i(fp_a),
+		.data_2_i(fp_b),
+		.data_mult_o(fp_x)
 	);
 	integer a;
 
@@ -68,9 +68,9 @@ module sim_float_12 ();
 		#40 reset_n = 1;
 		
 //		$display("%f", real_x);
-		#100
-		if(error) 
-			$finish();
+//		#100
+//		if(error) 
+//			$finish();
 	end
 
     // clock
@@ -144,9 +144,9 @@ module sim_float_12 ();
 
     // expected real
     assign w_real_x_expected = $realtobits(real_x_expected);
-    assign fp_expected_sgn = w_real_x_expected[63:63];
-    assign fp_expected_exp = w_real_x_expected[62:52] - 1023 + 15;
-    assign fp_expected_man = w_real_x_expected[51:46];
+    assign fp_expected_sgn = (w_real_x_expected[62:52] < 1008) ? 0 : w_real_x_expected[63:63];
+    assign fp_expected_exp = (w_real_x_expected[62:52] < 1008) ? 0 : ((w_real_x_expected[62:52] > 1039) ? 31 : w_real_x_expected[62:52] - 1023 + 15);
+    assign fp_expected_man = (w_real_x_expected[62:52] < 1008) ? 0 :w_real_x_expected[51:46];
     //assign fp_expected_man = w_real_x_expected[45:45] ? w_real_x_expected[51:46] + 1: w_real_x_expected[51:46];
     assign fp_x_expected = (w_real_x_expected == 0 ) ? 12'b0 :  {fp_expected_sgn, fp_expected_exp, fp_expected_man};
 
