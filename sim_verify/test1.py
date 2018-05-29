@@ -20,11 +20,37 @@ def q(x):
 q8 = np.vectorize(q)
 def qq(x):
     bits = cast(pointer(c_float(x)), POINTER(c_int32)).contents.value
-    # bits = bits + 0x100000;
-    bits=(bits>>17)<<17
+    # bits = bits + 0x010000;
+    # bits=(bits>>17)<<17
+    bits=bits&0xfffe0000
     return cast(pointer(c_int32(bits)), POINTER(c_float)).contents.value
 q12 = np.vectorize(qq)
 
+def byt_flt(x):
+    if((x&0x7c) == 0):
+        return 0.0
+    bits = ((x&0x80)<<24) | (((x&0x7c)>>2)+112)<<23 | (x&0x3)<<21
+    return np.float32(cast(pointer(c_int32(bits)), POINTER(c_float)).contents.value)
+b2f = np.vectorize(byt_flt)
+
+def flt_byt(x):
+    x = cast(pointer(c_float(x)), POINTER(c_int32)).contents.value
+    e = ((x&0x7F800000)>>23) - 112
+    if e<0:
+        e = 0
+    if e>31:
+        e = 31
+    bits = ((x&0x80000000)>>24) | e<<2 | (x&0x00600000)>>21
+    return np.uint8(bits)
+f2b = np.vectorize(flt_byt)
+
+def add(x):
+    while len(x)!=1:
+        t=[]
+        for a in range(0,len(x),2):
+            t.append(qq(x[a])+qq(x[a+1]))
+        x=t
+    return x[0]
 #######################         Input image
 in_l = np.zeros(dim_p*dim_p*dep, dtype='uint8').reshape((dim_p,dim_p,dep))
 if random == 0:
@@ -44,9 +70,9 @@ for z in range(0,dim):
                 f_in_b.write(bytearray(lis))
 ########################        expand kernels 
 ker_l_1 = np.zeros(ker*dep, dtype='uint8').reshape((ker,dep))
-# print(ker_l_1);print("________")
 f_k_1 = open("ker_1x1.txt","w")
 f_k_1_b = open("ker_1x1.bin","wb")
+# print(ker_l_1);print("________")
 for z in range(0,dep):
     lis = ker_l_1[:,z]
     f_k_1_b.write(bytearray(lis))
@@ -68,8 +94,9 @@ for m in range(0,dim): # repet 3x3 kernel
             f_k_3_b.write(bytearray(nin))
             f_k_3.write(str(nin)[1:-1]+'\n')
 ########################        exapnd bias
-# bis_1 = np.full(ker,0x3c,dtype='uint8')
-bis_1 = np.full(ker,0x00,dtype='uint8')
+#bis_1 = np.full(ker,101,dtype='uint8') #one
+bis_1 = np.random.randint(low = 0, high = 100, size = (ker),dtype='uint8')
+# bis_1 = np.full(ker,0x00,dtype='uint8')
 # bis_3 = np.full(ker,0x3c,dtype='uint8')
 bis_3 = np.full(ker,0x00,dtype='uint8')
 b_bis = open("bias.txt","w")
@@ -80,13 +107,15 @@ for i in range(0,ker,4):
     b_bis.write(str(bis_1[i:i+4])[1:-1]+'\n')
     b_bis_b.write(bytearray(bis_3[i:i+4]))
     b_bis_b.write(bytearray(bis_1[i:i+4]))
-
+bis_1 = b2f(bis_1) ######### convert to float
+print(bis_1)
+print(sum(bis_1))
+bis_3 = b2f(bis_3)
 #######################        expand convolution
-out_1 = np.zeros(ker*dep*dim*dim, dtype='uint8').reshape((ker,dep,dim,dim))
+out_1 = np.zeros(ker*dep*dim*dim, dtype='float32').reshape((ker,dep,dim,dim))
 for k in range(0,ker):
     for l in range(0,dep):
-        res = sg.convolve(in_l[:,:,l],[[ker_l_1[k,l]]] , "valid").astype(int)
-        res = np.bitwise_and(res, 0xff)
+        res = sg.convolve(in_l[:,:,l],[[ker_l_1[k,l]]] , "valid").astype(float)
         out_1[k,l,:,:]=res[1:-1,1:-1]
 # print(out_1[1,1,:,:]);print('______')
 f_out_1 = open("out_1x1.txt","w")
@@ -95,17 +124,16 @@ f_out_1_b = open("out_1x1.bin","wb")
 for r in range(0,dim):
     for d in range(0,dep):
         for c in range(0,dim):
-            lis = out_1[:,d,r,c]
+            lis = f2b( out_1[:,d,r,c])
             f_out_1_b.write(bytearray(lis))
             f_out_1.write(str(lis)[1:-1]+'\n')
 
 
-out_3 = np.zeros(ker*dep*dim*dim, dtype='uint8').reshape((ker,dep,dim,dim))
+out_3 = np.zeros(ker*dep*dim*dim, dtype='float32').reshape((ker,dep,dim,dim))
 for k in range(0,ker):
     for l in range(0,dep):
         kk = np.rot90(ker_l_3[k,l].reshape((3,3)),2)
-        res = sg.convolve(in_l[:,:,l],kk , "valid").astype(int) # addre lus
-        res = np.bitwise_and(res, 0xff)
+        res = sg.convolve(in_l[:,:,l],kk , "valid").astype(float) # addre lus #################### change to 12bit
         out_3[k,l,:,:]=res
 # print(out_3[1,1,:,:]);print('______')
 # out_3 = np.arange(ker*dep*dim*dim, dtype='uint8').reshape((ker,dep,dim,dim))
@@ -115,34 +143,34 @@ f_out_3_b = open("out_3x3.bin","wb")
 for r in range(0,dim):
     for d in range(0,dep):
         for c in range(0,dim):
-            lis = out_3[:,d,r,c]
+            lis = f2b(out_3[:,d,r,c])
             f_out_3_b.write(bytearray(lis))
             f_out_3.write(str(lis)[1:-1]+'\n')
 
 ############################ add bias and relu
 
-out_1 = np.sum(out_1,1,dtype='uint8') 
+out_1 = np.sum(out_1,1,dtype='float32') ########change to 12 bit
 for i in range(0,ker):
     out_1[i,:,:] = out_1[i,:,:] + bis_1[i]
-out_1[out_1 > 127] = 0 # no need for positive
+out_1[out_1 < 0] = 0.0 # no need for positive
 exp_out_1 = open("exp_1.txt","w")
 exp_out_1_b = open("exp_1.bin","wb")
 for x in range(0,dim):
     for y in range(0,dim):
-        lis=out_1[:,x,y]
+        lis=f2b(out_1[:,x,y])
         exp_out_1_b.write(bytearray(lis))
         exp_out_1.write(str(lis)[1:-1]+'\n')
 
 
-out_3 = np.sum(out_3,1,dtype='uint8')
+out_3 = np.sum(out_3,1,dtype='float32') ############# change
 for i in range(0,ker):
     out_3[i,:,:] = out_3[i,:,:] + bis_3[i]
-out_3[out_3 > 127] = 0
+out_3[out_3 < 0] = 0.0
 exp_out_3 = open("exp_3.txt","w")
 exp_out_3_b = open("exp_3.bin","wb")
 for x in range(0,dim):
     for y in range(0,dim):
-        lis=out_3[:,x,y]
+        lis=f2b(out_3[:,x,y])
         exp_out_3_b.write(bytearray(lis))
         exp_out_3.write(str(lis)[1:-1]+'\n')
 
@@ -201,7 +229,9 @@ else:
 
 ########################   squ kernel
 if random == 0:
-    sq_ker_l = np.zeros(sq_ker*dep, dtype='uint8').reshape((sq_ker,dep))
+    # sq_ker_l = np.full(sq_ker*dep,0x3c,dtype='uint8').reshape((sq_ker,dep))
+    sq_ker_l = np.random.randint(low=0, high=60, size = (sq_ker*dep),dtype='uint8').reshape((sq_ker,dep))
+    # sq_ker_l = np.zeros(sq_ker*dep, dtype='uint8').reshape((sq_ker,dep))
 else:
     sq_ker_l = np.random.randint(low = 0, high = 255, size = (sq_ker,dep), dtype='uint8')
 
@@ -224,31 +254,40 @@ for r in range(0,rep_no):
             sq_k_1.write(str(lis)[1:-1]+'\n')
             sq_k_1_b.write(bytearray(lis))
     
-
+sq_ker_l = b2f(sq_ker_l) #########converting to float
 #######################    squ bias
-sq_bis_1 = np.full(sq_ker,0x3c,dtype='uint8')
+#sq_bis_1 = np.full(sq_ker,0x00,dtype='uint8')
+sq_bis_1 = np.random.randint(low = 0, high = 100, size = (sq_ker),dtype='uint8')
+# print(sq_bis_1)
 f_sq_bis = open("sq_bias.txt","w")
 f_sq_bis_b = open("sq_bias.bin","wb")
-
 f_sq_bis.write(str(sq_bis_1)[1:-1]+'\n')
 f_sq_bis_b.write(bytearray(sq_bis_1))
 
+sq_bis_1 = b2f(sq_bis_1)# converting to float
 ######################    squ convoluve
-sq_out = np.zeros((sq_ker,dep,dim_sq,dim_sq), dtype='uint8')
+sq_out = np.zeros((sq_ker,dep,dim_sq,dim_sq), dtype='float32')
 for k in range(0,sq_ker):
     for l in range(0,dep):
-        res = sg.convolve(sq_in[l,:,:],[[sq_ker_l[k,l]]] , "valid").astype(int)
-        res = np.bitwise_and(res, 0xff)
+        res = sg.convolve(sq_in[l,:,:],[[sq_ker_l[k,l]]] , "valid").astype(float)
         sq_out[k,l,:,:]=res
 
-# print(sq_in[2,:,:])
-# print(sq_ker_l[0,2])
+# print(sq_in[0:3,:,:])
+# print(sq_ker_l[0,0])
 # print(sq_out[0,2,:,:])
 
-sq_out = np.sum(sq_out,1,dtype='uint8') 
+squ_out_tmp = np.zeros((sq_ker,dim_sq,dim_sq), dtype='float32')
+for a in range(0,sq_ker):
+    for b in range(0,dim_sq):
+        for c in range(0,dim_sq):
+            squ_out_tmp[a,b,c]=add(sq_out[a,:,b,c])
+sq_out = squ_out_tmp
+print(sq_out[:,0,0])
+print(sq_bis_1)
 for i in range(0,sq_ker):
     sq_out[i,:,:] = sq_out[i,:,:] + sq_bis_1[i]
-sq_out[sq_out > 127] = 0 # no need for positive
+sq_out[sq_out < 0] = 0 # no need for positive
+print(sq_out[:,0,0])
 
 # sq_out = np.arange(sq_ker*dim_sq*dim_sq, dtype='uint8').reshape((sq_ker,dim_sq,dim_sq)) # test ouptu
 # print(sq_out[0,:,:]);print('______')
@@ -256,7 +295,7 @@ f_sq_out_1 = open("sq_out.txt","w")
 f_sq_out_1_b = open("sq_out.bin","wb")
 for r in range(0,dim_sq):
     for d in range(0,sq_ker):
-        lis = sq_out[d,r,:]
+        lis = f2b(sq_out[d,r,:])
         f_sq_out_1_b.write(bytearray(lis))
         f_sq_out_1.write(str(lis)[1:-1]+'\n')
 

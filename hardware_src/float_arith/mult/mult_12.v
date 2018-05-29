@@ -141,7 +141,7 @@ module mult_12(
 	
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
-			r_multiply_by_zero_1 <= 0;
+			r_multiply_by_zero_2 <= 0;
 		end else begin
 			r_multiply_by_zero_2 <= r_multiply_by_zero_1;
 		end

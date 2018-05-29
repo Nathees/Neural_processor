@@ -91,18 +91,18 @@ module squeezenet_top(
 		Configurations :- EXPAND 3X3 KERNAL CONTROLLER
 		one_exp_ker_addr_limit_i 	:- [NO of expand kernals / 4]
 		exp_ker_depth_i 	  		:- [depth - 1]
-		layer_dimension_i 			:- [dimnision -1]
+		layer_dimension_i 			:- [dimnision -1] // After Expand
 
 		Configurations :- EXPAND 1X1 KERNAL CONTROLLER
 		tot_exp1_ker_addr_limit_i 	:- [(NO of expand kernals * depth) / 4 ] - 1
 		one_exp_ker_addr_limit_i 	:- [NO of expand kernals / 4]
 		exp_ker_depth_i 	  		:- [depth - 1]
-		layer_dimension_i 			:- [dimnision -1]
+		layer_dimension_i 			:- [dimnision -1] // After Expand
 
 		Configurations :- 
 		one_exp_layer_addr_limit_i 	:- [(dimension * expand kernals / 4)] - 1
 		exp_ker_depth_i 	  		:- [depth - 1]
-		layer_dimension_i 			:- [dimnision -1]
+		layer_dimension_i 			:- [dimnision -1] // After Expand
 		no_of_exp_kernals_i 		:- [2 * NO of expand kernals / 8 - 1]
 
 		exp_123_addr_space_i 		:- [expand kernal / 4 * 3] - 1 	
@@ -119,7 +119,7 @@ module squeezenet_top(
 		layer_dimension_i 			:- [dimension - 1]
 
 		Configurations :- MAX 2 SQUEEZE
-		tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1
+		tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1  // After max pool
 		no_of_squ_kernals_i 		:- [No of squeeze kernal - 1]
 		squ_3x3_ker_depth_i 		:- [squeeze 3x3 depth]
 		squ_layer_dimension_i 		:- [Squeeze layer dimension - 1] // After max pool

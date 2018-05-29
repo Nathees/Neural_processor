@@ -49,7 +49,7 @@ module squeeze_ram_controller(
 	/*
 
 	Configurations :- 
-	tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1
+	tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1 // After max pool
 	squ_kernals_i 				:- [No of squeeze kernal - 1]
 
 	*/

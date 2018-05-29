@@ -62,7 +62,7 @@ module max_2_squeeze_top(
 	/*
 
 	Configurations :- 
-	tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1
+	tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1 // After max pool
 	no_of_squ_kernals_i 		:- [No of squeeze kernal - 1]
 	squ_3x3_ker_depth_i 		:- [squeeze 3x3 depth]
 	squ_layer_dimension_i 		:- [Squeeze layer dimension - 1] // After max pool

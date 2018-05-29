@@ -101,7 +101,7 @@ module squeezenet_top_sim(
 		Configurations :- EXPAND 3X3 KERNAL CONTROLLER
 		one_exp3_ker_addr_limit_i 	:- [NO of expand kernals / 4]
 		exp3_ker_depth_i 	  		:- [depth - 1]
-		layer_dimension_i 			:- [dimnision -1]
+		layer_dimension_i 			:- [dimnision -1] // After Expand
 
 		Configurations :- EXPAND 1X1 KERNAL CONTROLLER
 		tot_exp1_ker_addr_limit_i 	:- [(NO of expand kernals * depth) / 4 ] - 1
@@ -129,7 +129,7 @@ module squeezenet_top_sim(
 		layer_dimension_i 			:- [dimension - 1]
 
 		Configurations :- MAX 2 SQUEEZE
-		tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1
+		tot_squ_addr_limit_i 		:- [(dimension * depth / 2) / 8] - 1 // After max pool
 		no_of_squ_kernals_i 		:- [No of squeeze kernal - 1]
 		squ_3x3_ker_depth_i 		:- [squeeze 3x3 depth]
 		layer_dim_i 				:- [dimension - 1]
@@ -294,6 +294,40 @@ module squeezenet_top_sim(
 	assign no_of_squ_kernals_i = 31; //31; //15;
 	assign squ_3x3_ker_depth_i = 64; //64; //64;
 	assign squ_layer_dimension_i = 12; //26; //5;
+	
+	// Squeezenet v1.1 Config
+	//layer 1 :- 	dim = 113 		depth = 3 		exp_kernal = 64 	squ_kernal = 16 	exp_1x1_en = 0 		max_en = 1 		avg_en = 0
+	//layer 2 :- 	dim = 56 		depth = 16 		exp_kernal = 64 	squ_kernal = 16 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
+	//layer 3 :- 	dim = 56 		depth = 16 		exp_kernal = 64 	squ_kernal = 32 	exp_1x1_en = 1 		max_en = 1 		avg_en = 0
+	//layer 4 :- 	dim = 27 		depth = 32 		exp_kernal = 128 	squ_kernal = 32 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
+	//layer 5 :- 	dim = 27 		depth = 32 		exp_kernal = 128 	squ_kernal = 48 	exp_1x1_en = 1 		max_en = 1 		avg_en = 0
+	//layer 6 :- 	dim = 13 		depth = 48 		exp_kernal = 192 	squ_kernal = 48 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
+	//layer 7 :- 	dim = 13 		depth = 48 		exp_kernal = 192 	squ_kernal = 64 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
+	//layer 8 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 64 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
+	//layer 9 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 100 	exp_1x1_en = 1 		max_en = 0 		avg_en = 1
+ 
+	/*assign exp_1x1_en_i =  1;
+	assign max_en_i =  1;
+	assign one_exp_ker_addr_limit_i =  16;
+	assign exp_ker_depth_i =  2;
+	assign layer_dimension_i =  112;
+	assign tot_exp1_ker_addr_limit_i =  47;
+	assign one_exp_layer_addr_limit_i =  1807;
+	assign no_of_exp_kernals_i =  15;
+	assign exp_123_addr_space_i =  47;
+	assign exp_12_addr_space_i =  32;
+	assign exp_1_addr_space_i =  15;
+	assign exp_tot_addr_space_i =  1806;
+	assign max_tot_addr_space_i =  894;
+	assign squ_repeat_en_i =  0;
+	assign avg_en_i =  0;
+	assign tot_squ_ker_addr_limit_i =  255;
+	assign one_squ_ker_addr_limit_i =  8;
+	assign squ_kernals_63_i =  15;
+	assign tot_squ_addr_limit_i =  447;
+	assign no_of_squ_kernals_i =  15;
+	assign squ_3x3_ker_depth_i =  64;
+	assign squ_layer_dimension_i =  55;*/
 
 	always @(posedge clk_i) begin
 		if(~rst_n_i) begin
@@ -503,7 +537,7 @@ module squeezenet_top_sim(
 
 	always_ff @(posedge clk_i) begin 
 		if(chk_out && r_squ_out != fifo_out_rd_data_o && ~avg_en_i) begin
-			//$finish;
+			$finish;
 		end
 	end
 	always_ff @(posedge clk_i) begin 
@@ -511,6 +545,9 @@ module squeezenet_top_sim(
 			$finish;
 		end
 	end
+
+	real real_a;
+	assign real_a = $bitstoreal(1425);
 
 /*	always_ff @(posedge clk_i) begin 
 		if(chk_out && r_out_3x3 != fifo_squeeze_3x3_rd_data_o && ~max_en_i) begin

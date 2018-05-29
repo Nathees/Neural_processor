@@ -537,5 +537,45 @@ module expand_ram_controller(
 		.skip_neg_en_i 						(r_last_layer_flag[6:6])  // [6:6]
 	);
 
+	//********************
+	/*reg [3:0] count_x;
+	always @(posedge clk_i) begin 
+		if(~rst_n_i) begin
+			count_x <= 0;
+		end else if(r_last_layer_flag[6:6]) begin
+			count_x <= count_x + 1;
+		end
+	end
+	always @(posedge clk_i) begin 
+		if(r_last_layer_flag[6:6] && count_x == 15) begin
+			$display("input : - %h\t %h",w_expand_out[47:00],w_bash_data);
+		end
+	end*/
+	//********************
+
+	//********************
+	/*reg [3:0] count_y;
+	reg valid;
+	always @(posedge clk_i) begin 
+		if(~rst_n_i) begin
+			count_y <= 0;
+		end else if(valid) begin
+			count_y <= count_y + 1;
+		end
+	end
+	always @(posedge clk_i) begin 
+		if(~rst_n_i) begin
+			valid <= 0;
+		end else begin
+			valid <= r_last_layer_flag[10:10];
+		end
+	end
+	always @(posedge clk_i) begin 
+		if(valid && count_y == 15) begin
+			$display("Output : - %h",w_ram_1x1_wr_data);
+		end
+	end*/
+	//********************
+
 endmodule
 
