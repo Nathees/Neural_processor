@@ -263,6 +263,7 @@ module add_12(
 				9'b00000001x : begin r_exp_shft <= 9; r_new_man <=  {r_man_inmt[0:0], 5'b0}; end
 				9'b000000001 : begin r_exp_shft <= 8; r_new_man <=  {6'b0}; end
 				9'b000000000 : begin r_exp_shft <= 0; r_new_man <=  {6'b0}; end
+				default : begin r_exp_shft <= 0; r_new_man <=  {6'b0}; end
 			endcase // r_man_inmt
 		end
 	end
@@ -288,10 +289,18 @@ module add_12(
 		if(~rst_n_i || r_exp_shft == 0) begin
 			r_man_x <= 0;
 			r_sgn_x <= 0;
-			r_exp_x <= 0;
 		end else begin
 			r_man_x <= r_new_man;
 			r_sgn_x <= r_sgn_4;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_exp_x
+		if(~rst_n_i || r_exp_shft == 0) begin
+			r_exp_x <= 0;
+		end else if((r_exp_shft[4] && r_exp_4 == 31) || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
+			r_exp_x <= r_exp_4;
+		end else begin
 			r_exp_x <= r_exp_4 + r_exp_shft - 15;
 		end
 	end

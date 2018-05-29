@@ -41,6 +41,8 @@ module add_en_12(
 	reg 				  	r_exp_a_gez;
 	reg  		[5:0]       r_exp_diff;
 
+	reg 					r_skip_neg_en_p1;
+
 
 //--------- second pipe line
 
@@ -57,6 +59,8 @@ module add_en_12(
 	reg 					r_sgn_a2;
 	reg 					r_sgn_b2;
 
+	reg 					r_skip_neg_en_p2;
+
 //---------- third pipe line
 
 	wire 		[9:0] 		w_man_add;
@@ -69,6 +73,7 @@ module add_en_12(
 	reg 		[5:0] 		r_exp_3;
 
 	reg 					r_sgn_3;
+	reg 					r_skip_neg_en_p3;
 
 //--------- fourth pipe line
 
@@ -77,6 +82,7 @@ module add_en_12(
 
 	reg 		[5:0] 		r_exp_4;
 	reg 					r_sgn_4;
+	reg 					r_skip_neg_en_p4;
 
 //--------- fifth pipe line
 	reg 		[5:0] 		r_man_x; 
@@ -133,6 +139,14 @@ module add_en_12(
 			r_exp_diff <= 0;
 		end else begin
 			r_exp_diff <= w_exp_diff;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_skip_neg_en_p1
+		if(~rst_n_i) begin
+			r_skip_neg_en_p1 <= 0;
+		end else begin
+			r_skip_neg_en_p1 <= skip_neg_en_i;
 		end
 	end
 
@@ -214,6 +228,14 @@ module add_en_12(
 		end
 	end
 
+	always @(posedge clk_i) begin : proc_r_skip_neg_en_p2
+		if(~rst_n_i) begin
+			r_skip_neg_en_p2 <= 0;
+		end else begin
+			r_skip_neg_en_p2 <= r_skip_neg_en_p1;
+		end
+	end
+
 	//-------------- third pipline
 	assign w_man_add = r_shft_mnt_a + r_shft_mnt_b;
 	assign w_man_sub = (r_mag_a_geq ? r_shft_mnt_a - r_shft_mnt_b : r_shft_mnt_b - r_shft_mnt_a);
@@ -246,6 +268,14 @@ module add_en_12(
 		end
 	end
 
+	always @(posedge clk_i) begin : proc_r_skip_neg_en_p3
+		if(~rst_n_i) begin
+			r_skip_neg_en_p3 <= 0;
+		end else begin
+			r_skip_neg_en_p3 <= r_skip_neg_en_p2;
+		end
+	end
+
 	//----------- fourth pipeline
 
 	assign w_man_inmt_roundoff = r_man_inmt[0] ? r_man_inmt +1 : r_man_inmt;
@@ -265,6 +295,7 @@ module add_en_12(
 				9'b00000001x : begin r_exp_shft <= 9; r_new_man <=  {r_man_inmt[0:0], 5'b0}; end
 				9'b000000001 : begin r_exp_shft <= 8; r_new_man <=  {6'b0}; end
 				9'b000000000 : begin r_exp_shft <= 0; r_new_man <=  {6'b0}; end
+				default : begin r_exp_shft <= 0; r_new_man <=  {6'b0}; end
 			endcase // r_man_inmt
 		end
 	end
@@ -285,19 +316,35 @@ module add_en_12(
 		end
 	end
 
-	//-------------------- fifth pipeline
-	always @(posedge clk_i) begin : proc_r_man_x
-		if(~rst_n_i || r_exp_shft == 0 || (skip_neg_en_i & r_sgn_4)) begin
-			r_man_x <= 0;
-			r_sgn_x <= 0;
-			r_exp_x <= 0;
+	always @(posedge clk_i) begin : proc_r_skip_neg_en_p4
+		if(~rst_n_i) begin
+			r_skip_neg_en_p4 <= 0;
 		end else begin
-			r_man_x <= r_new_man;
-			r_sgn_x <= r_sgn_4;
-			r_exp_x <= r_exp_4 + r_exp_shft - 15;
+			r_skip_neg_en_p4 <= r_skip_neg_en_p3;
 		end
 	end
 
+	//-------------------- fifth pipeline
+
+	always @(posedge clk_i) begin : proc_r_man_x
+		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4)) begin
+			r_man_x <= 0;
+			r_sgn_x <= 0;
+		end else begin
+			r_man_x <= r_new_man;
+			r_sgn_x <= r_sgn_4;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_exp_x
+		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4)) begin
+			r_exp_x <= 0;
+		end else if((r_exp_shft[4] && r_exp_4 == 31) || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
+			r_exp_x <= r_exp_4;
+		end else begin
+			r_exp_x <= r_exp_4 + r_exp_shft - 15;
+		end
+	end
 
 	assign data_sum_o = {r_sgn_x, r_exp_x, r_man_x};
 
