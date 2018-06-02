@@ -94,8 +94,8 @@ for m in range(0,dim): # repet 3x3 kernel
             f_k_3_b.write(bytearray(nin))
             f_k_3.write(str(nin)[1:-1]+'\n')
 ########################        exapnd bias
-#bis_1 = np.full(ker,101,dtype='uint8') #one
-bis_1 = np.random.randint(low = 0, high = 100, size = (ker),dtype='uint8')
+bis_1 = np.full(ker,120,dtype='uint8') #one
+##bis_1 = np.random.randint(low = 0, high = 127, size = (ker),dtype='uint8')
 # bis_1 = np.full(ker,0x00,dtype='uint8')
 # bis_3 = np.full(ker,0x3c,dtype='uint8')
 bis_3 = np.full(ker,0x00,dtype='uint8')
@@ -229,8 +229,8 @@ else:
 
 ########################   squ kernel
 if random == 0:
-    # sq_ker_l = np.full(sq_ker*dep,0x3c,dtype='uint8').reshape((sq_ker,dep))
-    sq_ker_l = np.random.randint(low=0, high=60, size = (sq_ker*dep),dtype='uint8').reshape((sq_ker,dep))
+    #sq_ker_l = np.full(sq_ker*dep,65,dtype='uint8').reshape((sq_ker,dep))
+    sq_ker_l = np.random.randint(low=63, high=65, size = (sq_ker*dep),dtype='uint8').reshape((sq_ker,dep))
     # sq_ker_l = np.zeros(sq_ker*dep, dtype='uint8').reshape((sq_ker,dep))
 else:
     sq_ker_l = np.random.randint(low = 0, high = 255, size = (sq_ker,dep), dtype='uint8')
@@ -256,8 +256,8 @@ for r in range(0,rep_no):
     
 sq_ker_l = b2f(sq_ker_l) #########converting to float
 #######################    squ bias
-#sq_bis_1 = np.full(sq_ker,0x00,dtype='uint8')
-sq_bis_1 = np.random.randint(low = 0, high = 100, size = (sq_ker),dtype='uint8')
+sq_bis_1 = np.full(sq_ker,0x00,dtype='uint8')
+##sq_bis_1 = np.random.randint(low = 0, high = 255, size = (sq_ker),dtype='uint8')
 # print(sq_bis_1)
 f_sq_bis = open("sq_bias.txt","w")
 f_sq_bis_b = open("sq_bias.bin","wb")
