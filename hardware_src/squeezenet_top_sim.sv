@@ -70,15 +70,15 @@
 `include "max_2_squeeze_top/average_fifo/average_fifo.v"
 `include "max_2_squeeze_top/output_fifo/output_fifo.v"
 
-`include "float_arith/add/add_12.v"
-`include "float_arith/add/add_en_12.v"
-`include "float_arith/mult/mult_12.v"
-`include "float_arith/multiplier/multiplier_7x7.v"
+//`include "float_arith/add/add_12.v"
+//`include "float_arith/add/add_en_12.v"
+//`include "float_arith/mult/mult_12.v"
+//`include "float_arith/multiplier/multiplier_7x7.v"
 
-//`include "float_arith/int/add_12.v"
-//`include "float_arith/int/add_en_12.v"
-//`include "float_arith/int/mult_12.v"
-//
+`include "float_arith/int/add_12.v"
+`include "float_arith/int/add_en_12.v"
+`include "float_arith/int/mult_12.v"
+
 `define EOF -1
 
 module squeezenet_top_sim(
@@ -233,7 +233,6 @@ module squeezenet_top_sim(
 		clk_i = 0;
 		rst_n_i = 0;
 
-		layer = $fopen("../sim_verify/input_layer.bin", "rb");
 		kernal_3x3 = $fopen("../sim_verify/ker_3x3.bin", "rb");
 		kernal_1x1 = $fopen("../sim_verify/ker_1x1.bin", "rb");
 		exp_bash = $fopen("../sim_verify/bias.bin", "rb");
@@ -259,6 +258,22 @@ module squeezenet_top_sim(
 		rst_n_i = 1;
 	end
 
+
+	initial begin
+		layer = $fopen("../sim_verify/input_layer.bin", "rb");
+		layer_data_i[71:64] = $fgetc(layer);
+		layer_data_i[63:56] = $fgetc(layer);
+		layer_data_i[55:48] = $fgetc(layer);
+		layer_data_i[47:40] = $fgetc(layer);
+		layer_data_i[39:32] = $fgetc(layer);
+		layer_data_i[31:24] = $fgetc(layer);
+		layer_data_i[23:16] = $fgetc(layer);
+		layer_data_i[15:08] = $fgetc(layer);
+		layer_data_i[07:00] = $fgetc(layer);
+		a = $fgetc(layer);
+		$display("update %h",layer_data_i);
+	end
+
 	reg [4:0] r_start_count;
 	always @(posedge clk_i) begin 
 		if(~rst_n_i) begin
@@ -271,7 +286,7 @@ module squeezenet_top_sim(
  	// config 1 :- dim 6; ker 64; dep = 4; squ_ker 16; 
  	// config 2 :- dim 27; ker 64; dep = 16; squ_ker 32;
  	// config 3 :- dim 13; ker 64; dep = 16; squ_ker 32; avg_en = 1;
-	assign exp_1x1_en_i = 1;
+	/*assign exp_1x1_en_i = 1;
 	assign max_en_i = 0;
 	assign one_exp_ker_addr_limit_i = 16; //16; //16;
 	assign exp_ker_depth_i = 15; //15; //3;
@@ -294,7 +309,7 @@ module squeezenet_top_sim(
 	assign no_of_squ_kernals_i = 31; //31; //15;
 	assign squ_3x3_ker_depth_i = 64; //64; //64;
 	assign squ_layer_dimension_i = 12; //26; //5;
-	
+	*/
 	// Squeezenet v1.1 Config
 	//layer 1 :- 	dim = 113 		depth = 3 		exp_kernal = 64 	squ_kernal = 16 	exp_1x1_en = 0 		max_en = 1 		avg_en = 0
 	//layer 2 :- 	dim = 56 		depth = 16 		exp_kernal = 64 	squ_kernal = 16 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
@@ -306,28 +321,28 @@ module squeezenet_top_sim(
 	//layer 8 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 64 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
 	//layer 9 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 100 	exp_1x1_en = 1 		max_en = 0 		avg_en = 1
  
-	/*assign exp_1x1_en_i =  1;
-	assign max_en_i =  1;
-	assign one_exp_ker_addr_limit_i =  16;
-	assign exp_ker_depth_i =  2;
-	assign layer_dimension_i =  112;
-	assign tot_exp1_ker_addr_limit_i =  47;
-	assign one_exp_layer_addr_limit_i =  1807;
-	assign no_of_exp_kernals_i =  15;
-	assign exp_123_addr_space_i =  47;
-	assign exp_12_addr_space_i =  32;
-	assign exp_1_addr_space_i =  15;
-	assign exp_tot_addr_space_i =  1806;
-	assign max_tot_addr_space_i =  894;
-	assign squ_repeat_en_i =  0;
+	assign exp_1x1_en_i =  1;
+	assign max_en_i =  0;
+	assign one_exp_ker_addr_limit_i =  64;
+	assign exp_ker_depth_i =  63;
+	assign layer_dimension_i =  12;
+	assign tot_exp1_ker_addr_limit_i =  4095;
+	assign one_exp_layer_addr_limit_i =  831;
+	assign no_of_exp_kernals_i =  63;
+	assign exp_123_addr_space_i =  191;
+	assign exp_12_addr_space_i =  128;
+	assign exp_1_addr_space_i =  63;
+	assign exp_tot_addr_space_i =  830;
+	assign max_tot_addr_space_i =  382;
+	assign squ_repeat_en_i =  1;
 	assign avg_en_i =  0;
-	assign tot_squ_ker_addr_limit_i =  255;
-	assign one_squ_ker_addr_limit_i =  8;
-	assign squ_kernals_63_i =  15;
-	assign tot_squ_addr_limit_i =  447;
-	assign no_of_squ_kernals_i =  15;
-	assign squ_3x3_ker_depth_i =  64;
-	assign squ_layer_dimension_i =  55;*/
+	assign tot_squ_ker_addr_limit_i =  6399;
+	assign one_squ_ker_addr_limit_i =  32;
+	assign squ_kernals_63_i =  63;
+	assign tot_squ_addr_limit_i =  415;
+	assign no_of_squ_kernals_i =  99;
+	assign squ_3x3_ker_depth_i =  256;
+	assign squ_layer_dimension_i =  12;
 
 	always @(posedge clk_i) begin
 		if(~rst_n_i) begin
@@ -336,23 +351,11 @@ module squeezenet_top_sim(
 			layer_ready_i <= 1;
 		end
 	end
-	initial begin
-		layer_data_i[71:64] = $fgetc(layer);
-		layer_data_i[63:56] = $fgetc(layer);
-		layer_data_i[55:48] = $fgetc(layer);
-		layer_data_i[47:40] = $fgetc(layer);
-		layer_data_i[39:32] = $fgetc(layer);
-		layer_data_i[31:24] = $fgetc(layer);
-		layer_data_i[23:16] = $fgetc(layer);
-		layer_data_i[15:08] = $fgetc(layer);
-		layer_data_i[07:00] = $fgetc(layer);
-		a = $fgetc(layer);
-	end
 	always @(posedge clk_i) begin 
-		if(~rst_n_i) begin
+		/*if(~rst_n_i) begin
 			layer_data_i <= 0;
-		end
-		else if(layer_req_o) begin
+		end*/
+		if(layer_req_o) begin
 			if(a != `EOF) begin
 				layer_data_i[71:64] <= a;
 				layer_data_i[63:56] <= $fgetc(layer);
