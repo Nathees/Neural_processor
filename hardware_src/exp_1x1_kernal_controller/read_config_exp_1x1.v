@@ -87,13 +87,13 @@ module read_config_exp_1x1(
 
 	reg 						[6:0] 								r_addr_space_per_lay;
 	reg 						[5:0] 								r_kernal_per_fire;
-	reg 						[5:0] 								r_layer_dim;
+	reg 						[6:0] 								r_layer_dim;
 
-	reg 						[5:0] 								r_col_count;
+	reg 						[6:0] 								r_col_count;
 	reg 															r_kernal_flag;
 	reg 						[5:0] 								r_kernal_count;
 	reg 															r_row_flag;
-	reg 						[5:0] 								r_row_count;
+	reg 						[6:0] 								r_row_count;
 
 	// Data Flag COntrol Signals
 	reg 						[3:0]								r_start_addr_flag;
@@ -127,7 +127,7 @@ module read_config_exp_1x1(
 		else if(start_i) begin
 			r_addr_space_per_lay	<= one_exp1_ker_addr_limit_i;
 			r_kernal_per_fire 		<= exp1_ker_depth_i;
-			r_layer_dim 			<= layer_dimension_i[5:0];
+			r_layer_dim 			<= layer_dimension_i;
 		end
 	end
 

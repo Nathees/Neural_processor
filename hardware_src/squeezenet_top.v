@@ -388,7 +388,7 @@ module squeezenet_top(
 		.one_squ_ker_addr_limit_i 				(one_squ_ker_addr_limit_i),
 		.tot_repeat_squ_kernals_i 				(tot_repeat_squ_kernals_i),
 		.squ_kernals_i 							(squ_kernals_63_i),
-		.layer_dimension_i 						(layer_dimension_i),
+		.layer_dimension_i 						(squ_layer_dimension_i),
 
 		.fifo_squeeze_clr_i 					(fifo_squeeze_clr_i),
 		.fifo_squeeze_wr_data_i 				(fifo_squeeze_wr_data_i),

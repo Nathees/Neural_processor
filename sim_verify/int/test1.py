@@ -2,13 +2,13 @@ import numpy as np
 from scipy import signal as sg
 dim = 13
 dim_p=dim + 2
-dep = 16
-ker = 64
-sq_ker = 32
+dep = 64
+ker = 256
+sq_ker = 100
 pool_en = 0
 av_pool_en = 1
 random = 0 #TODO
-sq_rep = 0 # repete squze kernl for last layer
+sq_rep = 1 # repete squze kernl for last layer
 
 #######################         Input image
 in_l = np.zeros(dim_p*dim_p*dep, dtype='uint8').reshape((dim_p,dim_p,dep))

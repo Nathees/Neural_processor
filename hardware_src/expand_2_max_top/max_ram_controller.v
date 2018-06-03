@@ -461,7 +461,7 @@ module max_ram_controller(
 		if(~rst_n_i) begin
 			r_busy_1 <= 0;
 		end else begin
-			r_busy_1 <= (state != IDEAL && exp_lst_layer_flag_i && w_wr_3x3_data_count > 500);
+			r_busy_1 <= (state != IDEAL && exp_lst_layer_flag_i); // && w_wr_3x3_data_count > 500);
 		end
 	end
 
