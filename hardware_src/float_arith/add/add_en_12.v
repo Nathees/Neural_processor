@@ -327,7 +327,7 @@ module add_en_12(
 	//-------------------- fifth pipeline
 
 	always @(posedge clk_i) begin : proc_r_man_x
-		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4)) begin
+		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4) || r_exp_4 == 0) begin
 			r_man_x <= 0;
 			r_sgn_x <= 0;
 		end else begin
@@ -337,7 +337,7 @@ module add_en_12(
 	end
 
 	always @(posedge clk_i) begin : proc_r_exp_x
-		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4)) begin
+		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4) || r_exp_4 == 0) begin
 			r_exp_x <= 0;
 		end else if((r_exp_shft[4] && r_exp_4 == 31) || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
 			r_exp_x <= r_exp_4;
