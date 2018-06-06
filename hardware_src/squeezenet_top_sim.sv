@@ -70,15 +70,15 @@
 `include "max_2_squeeze_top/average_fifo/average_fifo.v"
 `include "max_2_squeeze_top/output_fifo/output_fifo.v"
 
-//`include "float_arith/add/add_12.v"
-//`include "float_arith/add/add_en_12.v"
-//`include "float_arith/mult/mult_12.v"
-//`include "float_arith/multiplier/multiplier_7x7.v"
+`include "float_arith/add/add_12.v"
+`include "float_arith/add/add_en_12.v"
+`include "float_arith/mult/mult_12.v"
+`include "float_arith/multiplier/multiplier_7x7.v"
 
-`include "float_arith/int/add_12.v"
-`include "float_arith/int/add_en_12.v"
-`include "float_arith/int/mult_12.v"
-
+//`include "float_arith/int/add_12.v"
+//`include "float_arith/int/add_en_12.v"
+//`include "float_arith/int/mult_12.v"
+//
 `define EOF -1
 
 module squeezenet_top_sim(
@@ -286,7 +286,7 @@ module squeezenet_top_sim(
  	// config 1 :- dim 6; ker 64; dep = 4; squ_ker 16; 
  	// config 2 :- dim 27; ker 64; dep = 16; squ_ker 32;
  	// config 3 :- dim 13; ker 64; dep = 16; squ_ker 32; avg_en = 1;
-	/*assign exp_1x1_en_i = 1;
+	assign exp_1x1_en_i = 1;
 	assign max_en_i = 0;
 	assign one_exp_ker_addr_limit_i = 16; //16; //16;
 	assign exp_ker_depth_i = 15; //15; //3;
@@ -309,7 +309,7 @@ module squeezenet_top_sim(
 	assign no_of_squ_kernals_i = 31; //31; //15;
 	assign squ_3x3_ker_depth_i = 64; //64; //64;
 	assign squ_layer_dimension_i = 12; //26; //5;
-	*/
+	
 	// Squeezenet v1.1 Config
 	//layer 1 :- 	dim = 113 		depth = 3 		exp_kernal = 64 	squ_kernal = 16 	exp_1x1_en = 0 		max_en = 1 		avg_en = 0
 	//layer 2 :- 	dim = 56 		depth = 16 		exp_kernal = 64 	squ_kernal = 16 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
@@ -321,7 +321,7 @@ module squeezenet_top_sim(
 	//layer 8 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 64 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
 	//layer 9 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 100 	exp_1x1_en = 1 		max_en = 0 		avg_en = 1
  
-	assign exp_1x1_en_i =  1;
+	/*assign exp_1x1_en_i =  1;
 	assign max_en_i =  0;
 	assign one_exp_ker_addr_limit_i =  64;
 	assign exp_ker_depth_i =  63;
@@ -335,14 +335,14 @@ module squeezenet_top_sim(
 	assign exp_tot_addr_space_i =  830;
 	assign max_tot_addr_space_i =  382;
 	assign squ_repeat_en_i =  1;
-	assign avg_en_i =  0;
+	assign avg_en_i =  1;
 	assign tot_squ_ker_addr_limit_i =  6399;
 	assign one_squ_ker_addr_limit_i =  32;
 	assign squ_kernals_63_i =  63;
 	assign tot_squ_addr_limit_i =  415;
 	assign no_of_squ_kernals_i =  99;
 	assign squ_3x3_ker_depth_i =  256;
-	assign squ_layer_dimension_i =  12;
+	assign squ_layer_dimension_i =  12;*/
 
 	always @(posedge clk_i) begin
 		if(~rst_n_i) begin
