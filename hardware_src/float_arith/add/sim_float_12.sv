@@ -78,13 +78,13 @@ module sim_float_12 ();
     end
 
     // bits to real
-    assign real_a_bits[63:63] = fp_a[11:11];
-    assign real_a_bits[62:52] = fp_a[10:6] + 1023 - 15;
-    assign real_a_bits[51:0] = {fp_a[5:0] , 46'b0};
+    assign real_a_bits[63:63] = fp_a[10:0] == 0 ? 0: fp_a[11:11];
+    assign real_a_bits[62:52] = fp_a[10:0] == 0 ? 0: fp_a[10:6] + 1023 - 15;
+    assign real_a_bits[51:0] =  fp_a[10:0] == 0 ? 0: {fp_a[5:0] , 46'b0};
 
-    assign real_b_bits[63:63] = fp_b[11:11];
-    assign real_b_bits[62:52] = fp_b[10:6] + 1023 - 15;
-    assign real_b_bits[51:0] = {fp_b[5:0] , 46'b0};
+    assign real_b_bits[63:63] = fp_b[10:0] == 0? 0: fp_b[11:11];
+    assign real_b_bits[62:52] = fp_b[10:0] == 0? 0: fp_b[10:6] + 1023 - 15;
+    assign real_b_bits[51:0] =  fp_b[10:0] == 0? 0: {fp_b[5:0] , 46'b0};
 
     assign real_x_bits[63:63] = fp_x[11:11];
     assign real_x_bits[62:52] = fp_x[10:6] + 1023 - 15;
@@ -135,7 +135,7 @@ module sim_float_12 ();
     // expected real
     assign w_real_x_expected = $realtobits(real_x_expected);
     assign fp_expected_sgn = w_real_x_expected[63:63];
-    assign fp_expected_exp = w_real_x_expected[62:52] - 1023 + 15;
+    assign fp_expected_exp = (w_real_x_expected[62:52] > 1039 ) ? 31 : ((w_real_x_expected[62:52] < 1008) ? 0 :(w_real_x_expected[62:52] - 1023 + 15));
     assign fp_expected_man = w_real_x_expected[51:46];
     //assign fp_expected_man = w_real_x_expected[45:45] ? w_real_x_expected[51:46] + 1: w_real_x_expected[51:46];
     assign fp_x_expected = (w_real_x_expected == 0 ) ? 12'b0 :  {fp_expected_sgn, fp_expected_exp, fp_expected_man};
@@ -155,6 +155,7 @@ module sim_float_12 ();
     always_ff @(posedge clk) begin : proc_print
     	if(reset_n & r_error) begin
     		$display("Mismatch detected\n");
+            //$finish();
     	end
     end
 	

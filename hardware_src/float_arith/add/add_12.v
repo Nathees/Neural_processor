@@ -39,6 +39,9 @@ module add_12(
 	reg 				  	r_exp_a_gez;
 	reg  		[5:0]       r_exp_diff;
 
+	reg 					r_a_zero;
+	reg 					r_b_zero;
+
 
 //--------- second pipe line
 
@@ -134,9 +137,29 @@ module add_12(
 		end
 	end
 
+
+	always @(posedge clk_i) begin : proc_r_a_zero
+		if(~rst_n_i) begin
+			r_a_zero <= 0;
+		end else if(data_1_i[10:0] == 0) begin
+			r_a_zero <= 1;
+		end else begin
+			r_a_zero <= 0;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_b_zero
+		if(~rst_n_i) begin
+			r_b_zero <= 0;
+		end else if(data_2_i[10:0] == 0) begin
+			r_b_zero <= 1;
+		end else begin
+			r_b_zero <= 0;
+		end
+	end
 // ------------------ second pipe line
 	always @(posedge clk_i) begin : proc_r_shft_mnt_a
-		if(~rst_n_i) begin
+		if(~rst_n_i || r_a_zero) begin
 			r_shft_mnt_a <= 0;
 		end else if(r_exp_a_gez)begin
 			r_shft_mnt_a <= {1'b0, 1'b1, r_man_a, 2'b0};
@@ -156,7 +179,7 @@ module add_12(
 	end
 
 	always @(posedge clk_i) begin : proc_r_shft_mnt_b
-		if(~rst_n_i) begin
+		if(~rst_n_i || r_b_zero) begin
 			r_shft_mnt_b <= 0;
 		end else if(~r_exp_a_gez)begin
 			r_shft_mnt_b <= {1'b0, 1'b1, r_man_b, 2'b0};
@@ -287,7 +310,7 @@ module add_12(
 	//-------------------- fifth pipeline
 	// if number is zero r_exp_4 == 0
 	always @(posedge clk_i) begin : proc_r_man_x
-		if(~rst_n_i || r_exp_shft == 0 || r_exp_4 == 0) begin
+		if(~rst_n_i || r_exp_shft == 0 || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
 			r_man_x <= 0;
 			r_sgn_x <= 0;
 		end else begin
@@ -297,9 +320,9 @@ module add_12(
 	end
 
 	always @(posedge clk_i) begin : proc_r_exp_x
-		if(~rst_n_i || r_exp_shft == 0 || r_exp_4 == 0) begin
+		if(~rst_n_i || r_exp_shft == 0 || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
 			r_exp_x <= 0;
-		end else if((r_exp_shft[4] && r_exp_4 == 31) || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
+		end else if((r_exp_shft[4] && r_exp_4 == 31)) begin
 			r_exp_x <= r_exp_4;
 		end else begin
 			r_exp_x <= r_exp_4 + r_exp_shft - 15;
