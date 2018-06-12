@@ -134,9 +134,9 @@ module sim_float_12 ();
 
     // expected real
     assign w_real_x_expected = $realtobits(real_x_expected);
-    assign fp_expected_sgn = w_real_x_expected[63:63];
+    assign fp_expected_sgn = (w_real_x_expected[62:52] < 1008) ? 0 : w_real_x_expected[63:63];
     assign fp_expected_exp = (w_real_x_expected[62:52] > 1039 ) ? 31 : ((w_real_x_expected[62:52] < 1008) ? 0 :(w_real_x_expected[62:52] - 1023 + 15));
-    assign fp_expected_man = w_real_x_expected[51:46];
+    assign fp_expected_man = (w_real_x_expected[62:52] < 1008) ? 0 : w_real_x_expected[51:46];
     //assign fp_expected_man = w_real_x_expected[45:45] ? w_real_x_expected[51:46] + 1: w_real_x_expected[51:46];
     assign fp_x_expected = (w_real_x_expected == 0 ) ? 12'b0 :  {fp_expected_sgn, fp_expected_exp, fp_expected_man};
 
