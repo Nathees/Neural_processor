@@ -69,13 +69,13 @@ module mult_12(
 	assign w_mult_ab = w_mult_result[13:6];
 
 	// xilinx instatiation
-	/* multiplier_7x7 multiplier_7x7_inst
-   	(
-	     .CLK			     (clk_i),
-	     .A 				(w_mult_a),
-	     .B 				(w_mult_b),
-	     .P 				(w_mult_result)
-   	);*/
+	// multiplier_7x7 multiplier_7x7_inst
+   	//(
+	//     .CLK			     (clk_i),
+	//     .A 				(w_mult_a),
+	//     .B 				(w_mult_b),
+	//     .P 				(w_mult_result)
+   	//);
 
 	// assuming two stage pipe line for mutiplier
 	//----------- first pipe line

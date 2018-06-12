@@ -7,7 +7,7 @@ ker = 256
 sq_ker = 100
 pool_en = 0
 av_pool_en = 1
-random = 0 #TODO
+random = 1 #TODO
 sq_rep = 1 # repete squze kernl for last layer
 
 #######################         Input image
