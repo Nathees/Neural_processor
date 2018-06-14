@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string.h>
+#include <stdint.h>
 #include "in_out_layer.hpp"
 
 #define debug_en 1
@@ -53,7 +54,8 @@ int initialise_input_output_layer(unsigned int* lw_AXI_offset, unsigned short No
 	 	#endif
 
 	// 0x0000000c -------        start of input layer axi address
-	 	Record = (unsigned int)start_in_layer_axi_address;
+	 	//uintptr_t Record_ptr = (unsigned int) ;
+	 	Record = (long) start_in_layer_axi_address;
 	 	reg_axi_address = lw_AXI_offset + 12;
 	 	memcpy(lw_AXI_offset+12, &Record, 4);
 	 	#ifdef debug_en
@@ -95,7 +97,7 @@ int initialise_input_output_layer(unsigned int* lw_AXI_offset, unsigned short No
 	 	#endif
 
 	// 0x00000088 -------        start of output layer axi address
-	 	Record = (unsigned int)start_out_layer_axi_address;
+	 	Record = (long) start_out_layer_axi_address;
 	 	reg_axi_address = lw_AXI_offset + 136;
 	 	memcpy(lw_AXI_offset+136, &Record, 4);
 	 	#ifdef debug_en
@@ -130,9 +132,12 @@ unsigned int calculate_axi_settings(unsigned short No_of_rows, unsigned short No
 int main(int argc, char const *argv[])
 {
 	/* code */
-	initialise_input_output_layer(0x02000000, 56, 56
+	unsigned int  ptr_1[256];
+	unsigned int  ptr_2;
+	unsigned int  ptr_3;
+	initialise_input_output_layer( ptr_1, 56, 56
 		, 64, 64, 64
-		, 0xf0000000, 0, 1, 0, 2
-		, 0xff000000);
+		, (unsigned int*) &ptr_2, 0, 1, 0, 2
+		, (unsigned int*) &ptr_3);
 	return 0;
 }
