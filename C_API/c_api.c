@@ -29,7 +29,7 @@ unsigned int calculate_axi_settings(unsigned int No_of_rows, unsigned int No_of_
 
 int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short No_of_actual_input_rows, unsigned short No_of_actual_input_cols
 		, unsigned short No_of_input_layers, unsigned short No_of_expand_layers, unsigned short No_of_squeeze_layers
-		, unsigned char* start_in_layer_axi_address, unsigned char max_pool_en, unsigned char expand_en, unsigned char stride2en, unsigned char layer_ID
+		, unsigned char* start_in_layer_axi_address, unsigned char max_pool_en, unsigned char avg_pool_en, unsigned char expand_en, unsigned char stride2en, unsigned char layer_ID
 		, unsigned char* start_out_layer_axi_address) {
 
 	//-----------------------------------------------------------------------
@@ -63,7 +63,7 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 	unsigned short no_of_input_cols = stride2en ? No_of_actual_input_cols/2 : No_of_actual_input_cols;
 
 
-	// 0x00000014 -------        (byte1, byte0 = No_of_rows), (byte3, byte2 = no_of_cols)
+	// 0x00000004 -------        (byte1, byte0 = No_of_rows), (byte3, byte2 = no_of_cols)
 	 	Record = No_of_input_rows | (unsigned int) (no_of_input_cols << 16);
 	 	reg_axi_address = lw_AXI_offset + 4;
 	 	memcpy(reg_axi_address, &Record, 4);
@@ -128,6 +128,104 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, Record);
 
 
+	// FIRE Layer COnfiguration
+		unsigned int fire_config = 0;
+
+		//Layer dimension after maxpool
+		int max_dim = 0;
+		if (dim % 2 == 0)
+			max_dim = (No_of_input_rows >> 1) - 1;
+		else
+			max_dim = (No_of_input_rows >> 1);
+
+		// Max Squeeze Kernel
+		int max_squ_kernel = 0;
+		if (No_of_expand_layers * No_of_squeeze_layers > 16384)
+			if (16384 % No_of_expand_layers != 0)
+				printf("config error in repeat squeeze kernel\n");
+			else
+				max_squ_kernel = 16384; // exp_kernal
+		else
+			max_squ_kernel = No_of_squeeze_layers;
+
+		// Squeeze layer Input dimension
+		int squ_dim = 0;
+		if (max_pool_en) 
+			squ_dim = max_dim
+		else
+			squ_dim = No_of_input_rows
+
+	// 	0x00000090
+		reg_axi_address = lw_AXI_offset + 144;
+		fire_config = (No_of_input_rows - 1) << 16;
+		fire_config = fire_config + ((No_of_input_layers - 1) << 8);
+		fire_config = fire_config + (unsigned int)(No_of_expand_layers / 4);
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);
+
+	// 	0x00000094
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 148;
+		fire_config = (((No_of_input_rows * No_of_expand_layers) / 4 ) - 1) << 16;
+		fire_config = fire_config + (((No_of_expand_layers * No_of_input_layers) / 4) - 1);
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);
+
+	// 	0x00000098
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 152;
+		fire_config = ((No_of_expand_layers / 4 * 1) - 1) << 24;
+		fire_config = fire_config + ((No_of_expand_layers / 4 * 2) << 16);
+		fire_config = fire_config + (((No_of_expand_layers / 4 * 3) - 1) << 8);
+		fire_config = fire_config + ((2 * exp_kernal / 8) - 1);
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);
+
+	// 	0x0000009C
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 156;	
+		fire_config = ((max_dim * No_of_expand_layers / 4) - 2) << 16;
+		fire_config = fire_config + ((No_of_input_rows * No_of_expand_layers / 4) - 2);
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);
+
+ 	// 	0x000000A0
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 160;	
+		fire_config = (No_of_expand_layers / 8) << 16;
+		fire_config = fire_config + ((No_of_squeeze_layers * 2 * No_of_expand_layers / 8) - 1);
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);
+
+	// 	0x000000A4
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 164;
+		fire_config = (max_squ_kernel - 1) << 16;
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);	
+
+	// 	0x000000A8
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 168;
+		fire_config = (No_of_squeeze_layers - 1) << 16;
+		fire_config = fire_config + ((squ_dim * No_of_expand_layers / 8) - 1);
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);	
+
+	// 	0x000000AC
+		fire_config = 0;
+		reg_axi_address = lw_AXI_offset + 172;
+		fire_config = (squ_dim - 1) << 16;
+		fire_config = fire_config + No_of_expand_layers;
+		memcpy(reg_axi_address, &fire_config, 4);
+		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, fire_config);
+
+	// Squeeze repeat enable
+	unsigned char squ_repeat_en = 0;
+	if (No_of_expand_layers * No_of_squeeze_layers > 16384) :
+		squ_repeat_en = 1;
+	else
+		squ_repeat_en = 0;
 
 	// 0x00000000 ------- 		 (byte0[0] == Start processing), (byte0[1] = max_pool_en), ((byte0[2] = expand_en), ((byte0[3] = in_layer_ddr3_data_rdy), (byte1 = layer_ID) , (byte2, byte3 = No_of_input_layers)
 		Record = ( 1 | (max_pool_en << 1) & 0x00000002) | ((expand_en << 2) & 0x00000004) | 0x00000008 | ((layer_ID << 8) & 0x0000ff00) | ((No_of_input_layers << 16) & 0xffff0000);
