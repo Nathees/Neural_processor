@@ -118,8 +118,8 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 	//----------------------------------------------------------------------
 
 
-	 unsigned int No_of_output_Rows = max_pool_en ? No_of_input_rows/2 + 1 : No_of_input_rows;
-	 unsigned int No_of_output_Cols = max_pool_en ? no_of_input_cols/2 + 1 : no_of_input_cols;
+	 unsigned int No_of_output_Rows = max_pool_en ? (No_of_input_rows -1)/2 : No_of_input_rows;
+	 unsigned int No_of_output_Cols = max_pool_en ? (no_of_input_cols - 1)/2 : no_of_input_cols;
 	 unsigned int No_output_layers = No_of_squeeze_layers;
 
 
@@ -278,7 +278,7 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 
 	// 0x00000020 ------- kernel0 settings        
 		Record = 1;
-		if(~expand_en){
+		if(expand_en == 0){
 			Record = Record | 0x2;
 		}
 		reg_axi_address = lw_AXI_offset + 0x20;
@@ -422,7 +422,7 @@ int main(void)
           unsigned short no_of_input_layers = 16;
           unsigned short no_of_exp_kernels = 64;
           unsigned short no_of_squeeze_kernels = 16;
-          unsigned char max_pool_en = 0;
+          unsigned char max_pool_en = 1;
           unsigned char avg_pool_en = 0;
           unsigned char exp_en = 1;
           unsigned char stride2en = 0;
@@ -434,14 +434,17 @@ int main(void)
           unsigned int kernel_4_offset = 0x125000;
 
           // calculated parameters
-          unsigned short out_row_size =  stride2en ? in_row_size/2 : in_row_size;
-          out_row_size = max_pool_en ? out_row_size/2 : out_row_size;
-          unsigned short out_col_size = stride2en ? in_col_size/2 : in_col_size;
-          out_col_size = max_pool_en ? out_col_size/2 : out_col_size;
+          unsigned short out_row_size =  stride2en ? (in_row_size - 1)/2 : in_row_size;
+          out_row_size = max_pool_en ? (out_row_size-1)/2 : out_row_size;
+          unsigned short out_col_size = stride2en ? (in_col_size - 1)/2 : in_col_size;
+          out_col_size = max_pool_en ? (out_col_size-1)/2 : out_col_size;
           unsigned short no_of_output_layers = no_of_squeeze_kernels;
 
           unsigned short in_layer_blk_size = in_row_size * in_col_size > 4096 ? 65536 : 4096;
           unsigned short allocated_space_per_row = in_row_size > 64 ? 256 : 64;
+
+          printf("\nin_layer_blk_size: %d", in_layer_blk_size);
+          printf("\nallocated_space_per_row: %d", allocated_space_per_row);
 
 
           //Map LED_PIO Physical Address to Virtual Address Space
@@ -461,26 +464,26 @@ int main(void)
 
           f = fopen("ker_3x3.bin", "rb");
           unsigned int ker_3x3_size =  9 * no_of_input_layers* no_of_exp_kernels;
-          fread(ddr3_common + 0x80000, 1, ker_3x3_size ,f);
+          fread(ddr3_common + kernel_0_offset, 1, ker_3x3_size ,f);
           fclose(f);
 
           f = fopen("ker_1x1.bin", "rb");
           unsigned int ker_1x1_size =  1 * no_of_input_layers* no_of_exp_kernels;
-          fread(ddr3_common + 0x110000, 1, ker_1x1_size, f);
+          fread(ddr3_common + kernel_1_offset, 1, ker_1x1_size, f);
           fclose(f);
 
           f = fopen("bias.bin", "rb");
-          fread(ddr3_common + 0x114000, 1, no_of_exp_kernels*2 ,f);
+          fread(ddr3_common + kernel_2_offset, 1, no_of_exp_kernels*2 ,f);
           fclose(f);
 
           f = fopen("sq_ker.bin", "rb");
           unsigned int sq_ker_size = 2*no_of_exp_kernels*no_of_squeeze_kernels;
-          fread(ddr3_common + 0x115000, 1, sq_ker_size,f);
+          fread(ddr3_common + kernel_3_offset, 1, sq_ker_size,f);
           fclose(f);
 
           f = fopen("sq_bias.bin", "rb");
           unsigned int sq_bias_size = no_of_squeeze_kernels;
-          fread(ddr3_common + 0x125000, sq_bias_size, 0x10,f);
+          fread(ddr3_common + kernel_4_offset, 1, sq_bias_size,f);
           fclose(f);
 
 //          for(k = 0; k < 0x1000; k++){
@@ -549,25 +552,25 @@ int main(void)
 
 
          //  kernel loader
-          memcpy(lw_addr+32, &row_8, 4);
-          memcpy(lw_addr+36, &row_9, 4);
-          memcpy(lw_addr+40, &row_10, 4);
-
-          memcpy(lw_addr+48, &row_12, 4);
-          memcpy(lw_addr+52, &row_13, 4);
-          memcpy(lw_addr+56, &row_14, 4);
-
-          memcpy(lw_addr+64, &row_16, 4);
-          memcpy(lw_addr+68, &row_17, 4);
-          memcpy(lw_addr+72, &row_18, 4);
-
-          memcpy(lw_addr+80, &row_20, 4);
-          memcpy(lw_addr+84, &row_21, 4);
-          memcpy(lw_addr+88, &row_22, 4);
-
-          memcpy(lw_addr+96, &row_24, 4);
-          memcpy(lw_addr+100, &row_25, 4);
-          memcpy(lw_addr+104, &row_26, 4);
+//          memcpy(lw_addr+32, &row_8, 4);
+//          memcpy(lw_addr+36, &row_9, 4);
+//          memcpy(lw_addr+40, &row_10, 4);
+//
+//          memcpy(lw_addr+48, &row_12, 4);
+//          memcpy(lw_addr+52, &row_13, 4);
+//          memcpy(lw_addr+56, &row_14, 4);
+//
+//          memcpy(lw_addr+64, &row_16, 4);
+//          memcpy(lw_addr+68, &row_17, 4);
+//          memcpy(lw_addr+72, &row_18, 4);
+//
+//          memcpy(lw_addr+80, &row_20, 4);
+//          memcpy(lw_addr+84, &row_21, 4);
+//          memcpy(lw_addr+88, &row_22, 4);
+//
+//          memcpy(lw_addr+96, &row_24, 4);
+//          memcpy(lw_addr+100, &row_25, 4);
+//          memcpy(lw_addr+104, &row_26, 4);
 
 
           //output layer
@@ -589,7 +592,7 @@ int main(void)
           initialise_input_output_layer(lw_addr, in_row_size, in_col_size
                     		, no_of_input_layers, no_of_exp_kernels, no_of_squeeze_kernels
                     		, (unsigned char*)0x30000000, max_pool_en, avg_pool_en, exp_en, stride2en, 5
-                    		, (unsigned char*)(0x30000000 + 0x400000), ddr3_common, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset );
+                    		, (unsigned char*)(0x30000000 + 0x400000), (unsigned char*)0x30000000, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset );
           // issue start signal
 //          memcpy(lw_addr+4, &row_1, 4);
           //memcpy(lw_addr, &row_0, 4);
@@ -599,10 +602,10 @@ int main(void)
           printf("reading value in ddr3 output address space\n");
           //int i = 0;
 
-          for(k = 0; k < 16; k++){
-			  for(i = 0; i < 56; i++){
-				  for(j = 0; j < 56; j++){
-					 printf("%d ", *(ddr3_common+ 0x400000 + 4096 * k + (i * 64) + j)) ;
+          for(k = 0; k < no_of_output_layers; k++){
+			  for(i = 0; i < out_row_size; i++){
+				  for(j = 0; j < out_col_size; j++){
+					 printf("%d ", *(ddr3_common+ 0x400000 + in_layer_blk_size * k + (i * allocated_space_per_row) + j)) ;
 				 }
 				  printf("\n");
 			  }
