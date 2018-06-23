@@ -68,8 +68,8 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 	//----------common paprameters and input layer--------------------------
 	//-----------------------------------------------------------------------
 
-	unsigned short No_of_input_rows = stride2en ? No_of_actual_input_rows/2 : No_of_actual_input_rows;
-	unsigned short no_of_input_cols = stride2en ? No_of_actual_input_cols/2 : No_of_actual_input_cols;
+	unsigned short No_of_input_rows = stride2en ? (No_of_actual_input_rows - 1)/2 : No_of_actual_input_rows;
+	unsigned short no_of_input_cols = stride2en ? (No_of_actual_input_cols - 1)/2 : No_of_actual_input_cols;
 
 
 	// 0x00000004 -------        (byte1, byte0 = No_of_rows), (byte3, byte2 = no_of_cols)
@@ -119,8 +119,10 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 
 
 	 unsigned int No_of_output_Rows = max_pool_en ? (No_of_input_rows -1)/2 : No_of_input_rows;
+	 No_of_output_Rows = avg_pool_en? 1 : No_of_output_Rows;
 	 unsigned int No_of_output_Cols = max_pool_en ? (no_of_input_cols - 1)/2 : no_of_input_cols;
-	 unsigned int No_output_layers = No_of_squeeze_layers;
+	 No_of_output_Cols = avg_pool_en ? No_of_squeeze_layers : No_of_output_Cols;
+	 unsigned int No_output_layers = avg_pool_en ? 1 : No_of_squeeze_layers;
 
 
 
@@ -278,9 +280,6 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 
 	// 0x00000020 ------- kernel0 settings        
 		Record = 1;
-		if(expand_en == 0){
-			Record = Record | 0x2;
-		}
 		reg_axi_address = lw_AXI_offset + 0x20;
 		memcpy(reg_axi_address, &Record, 4);
 		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, Record);
@@ -304,6 +303,9 @@ int initialise_input_output_layer(unsigned char* lw_AXI_offset, unsigned short N
 
 	// 0x00000030 ------- kernel1 settings 
 		Record = 0;       
+//		if(expand_en == 0){
+//			Record = Record | 0x2;
+//		}
 		reg_axi_address = lw_AXI_offset + 0x30;
 		memcpy(reg_axi_address, &Record, 4);
 		printf("\nReg Address:%x Value:%x", (unsigned int)reg_axi_address, Record);
@@ -417,12 +419,12 @@ int main(void)
           fd = open("/dev/mem", (O_RDWR | O_SYNC));
 
           // layer parameters
-          unsigned short in_row_size = 56;
-          unsigned short in_col_size = 56;
-          unsigned short no_of_input_layers = 16;
+          unsigned short in_row_size = 12;
+          unsigned short in_col_size = 12;
+          unsigned short no_of_input_layers = 64;
           unsigned short no_of_exp_kernels = 64;
-          unsigned short no_of_squeeze_kernels = 16;
-          unsigned char max_pool_en = 1;
+          unsigned short no_of_squeeze_kernels = 64;
+          unsigned char max_pool_en = 0;
           unsigned char avg_pool_en = 0;
           unsigned char exp_en = 1;
           unsigned char stride2en = 0;
@@ -436,11 +438,13 @@ int main(void)
           // calculated parameters
           unsigned short out_row_size =  stride2en ? (in_row_size - 1)/2 : in_row_size;
           out_row_size = max_pool_en ? (out_row_size-1)/2 : out_row_size;
+          out_row_size = avg_pool_en ? 1 : out_row_size;
           unsigned short out_col_size = stride2en ? (in_col_size - 1)/2 : in_col_size;
           out_col_size = max_pool_en ? (out_col_size-1)/2 : out_col_size;
-          unsigned short no_of_output_layers = no_of_squeeze_kernels;
+          out_col_size = avg_pool_en ? no_of_squeeze_kernels : out_col_size;
+          unsigned short no_of_output_layers = avg_pool_en? 1 :no_of_squeeze_kernels;
 
-          unsigned short in_layer_blk_size = in_row_size * in_col_size > 4096 ? 65536 : 4096;
+          unsigned int in_layer_blk_size = in_row_size * in_col_size > 4096 ? 65536 : 4096;
           unsigned short allocated_space_per_row = in_row_size > 64 ? 256 : 64;
 
           printf("\nin_layer_blk_size: %d", in_layer_blk_size);
@@ -598,11 +602,12 @@ int main(void)
           //memcpy(lw_addr, &row_0, 4);
 
 
-          usleep(10000);
+          usleep(100000);
           printf("reading value in ddr3 output address space\n");
           //int i = 0;
 
           for(k = 0; k < no_of_output_layers; k++){
+        	  printf("\nlayer id: %d\n", k);
 			  for(i = 0; i < out_row_size; i++){
 				  for(j = 0; j < out_col_size; j++){
 					 printf("%d ", *(ddr3_common+ 0x400000 + in_layer_blk_size * k + (i * allocated_space_per_row) + j)) ;
