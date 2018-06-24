@@ -15,7 +15,7 @@
 unsigned int calculate_axi_settings(unsigned int No_of_rows, unsigned int No_of_cols, unsigned char stride2en){
 
 
-	unsigned int burst_per_row = (No_of_rows % 128 == 0 ? No_of_rows/128 : No_of_rows/128 + 1);
+	unsigned int burst_per_row = (No_of_rows < 64 ? 1 : 2);
 	unsigned int read_burst_len = No_of_rows > 64 ? 15 : 7;
 	unsigned int allocated_space_per_row = (burst_per_row * (read_burst_len + 1) * 8) <= 64 ? 64 : 256;
 
@@ -419,12 +419,12 @@ int main(void)
           fd = open("/dev/mem", (O_RDWR | O_SYNC));
 
           // layer parameters
-          unsigned short in_row_size = 56;
-          unsigned short in_col_size = 56;
-          unsigned short no_of_input_layers = 16;
+          unsigned short in_row_size = 120;
+          unsigned short in_col_size = 120;
+          unsigned short no_of_input_layers = 3;
           unsigned short no_of_exp_kernels = 64;
-          unsigned short no_of_squeeze_kernels = 16;
-          unsigned char max_pool_en = 1;
+          unsigned short no_of_squeeze_kernels = 3;
+          unsigned char max_pool_en = 0;
           unsigned char avg_pool_en = 0;
           unsigned char exp_en = 1;
           unsigned char stride2en = 0;
