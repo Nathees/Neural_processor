@@ -224,6 +224,15 @@ module expand_convolution(
 		end
 	end
 	
+	reg [15:0] r_in_count  /*synthesis noprune */;
+	always @(posedge clk_i) begin 
+		if(~rst_n_i || start_i) begin
+			r_in_count <= 0;
+		end else if(layer_req_o) begin
+			r_in_count <= r_in_count + 1;
+		end
+	end
+	
 //----------------------------------------------------------------------------------------------------------------------
 // Sub module instantiation
 //----------------------------------------------------------------------------------------------------------------------

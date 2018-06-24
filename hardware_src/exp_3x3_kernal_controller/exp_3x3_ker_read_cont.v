@@ -125,7 +125,7 @@ module exp_3x3_ker_read_cont(
 
 	// EXPAND 3x3 RAM Read Address
 	always @(posedge clk_i) begin : EXP_3X3_RAM_RDADDR
-		if(~rst_n_i) begin
+		if(~rst_n_i || start_i) begin
 			exp_3x3_ram_rd_addr_o <= 0;
 		end 
 		else if(exp_3x3_kerl_req_i && exp_3x3_ram_rd_addr_o == w_rd_end_addr) begin

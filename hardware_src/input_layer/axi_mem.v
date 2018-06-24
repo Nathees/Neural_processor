@@ -705,7 +705,7 @@
 
 			// common paprameters and input layer
 	// 0x00000000 ------- 		 (byte0[0] == Start processing), (byte0[1] = max_pool_en), ((byte0[2] = expand_en), ((byte0[3] = in_layer_ddr3_data_rdy), (byte1 = layer_ID) , (byte2, byte3 = No_of_input_layers)
-	// 0x00000014 -------        (byte1, byte0 = No_of_rows), (byte3, byte2 = no_of_cols)
+	// 0x00000004 -------        (byte1, byte0 = No_of_rows), (byte3, byte2 = no_of_cols)
 	// 0x00000008 -------        (byte0, byte1 == No_of_expand_layers), (byte2, byte3 = No_of_squeeze_layers)
 	// 0x0000000c -------        start of input layer axi address
 	// 0x00000010 -------        (byte01, byte0 = allocated_space_per_row), (byte2 = burst_per_row),  (byte3[7:4] = read_burst_len, byte3[25:24] = stride2en, larger_block_en)
@@ -1081,7 +1081,7 @@
 			layer_dimension_o			<= 0;
 		end else if(mem_wren && mem_address == 36) begin
 			one_exp_ker_addr_limit_o	<= S_AXI_WDATA[06:00];
-			exp_ker_depth_o				<= S_AXI_WDATA[12:08];
+			exp_ker_depth_o				<= S_AXI_WDATA[13:08];
 			layer_dimension_o			<= S_AXI_WDATA[22:16];
 		end
 	end

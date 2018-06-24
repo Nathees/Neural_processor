@@ -470,7 +470,7 @@ module max_ram_controller(
 		if(~rst_n_i) begin
 			r_busy_2 <= 0;
 		end else begin
-			r_busy_2 <= (~r_max_en && exp_lst_layer_flag_i && w_wr_3x3_data_count > 500);
+			r_busy_2 <= (~r_max_en && exp_lst_layer_flag_i && w_wr_3x3_data_count > 450);
 		end
 	end
 
@@ -480,6 +480,24 @@ module max_ram_controller(
 			squeeze_fifo_busy_o <= 0;
 		end else begin
 			squeeze_fifo_busy_o <= (r_busy_1 || r_busy_2);
+		end
+	end
+	
+	reg [15:0] r_exp_count  /*synthesis noprune */;
+	always @(posedge clk_i) begin 
+		if(~rst_n_i || start_i) begin
+			r_exp_count <= 0;
+		end else if(r_fifo_wr_en) begin
+			r_exp_count <= r_exp_count + 1;
+		end
+	end
+	
+	reg [15:0] r_squ_count  /*synthesis noprune */;
+	always @(posedge clk_i) begin 
+		if(~rst_n_i || start_i) begin
+			r_squ_count <= 0;
+		end else if(fifo_squeeze_3x3_rd_en_i) begin
+			r_squ_count <= r_squ_count + 1;
 		end
 	end
 
