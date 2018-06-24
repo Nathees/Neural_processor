@@ -419,12 +419,12 @@ int main(void)
           fd = open("/dev/mem", (O_RDWR | O_SYNC));
 
           // layer parameters
-          unsigned short in_row_size = 12;
-          unsigned short in_col_size = 12;
-          unsigned short no_of_input_layers = 64;
+          unsigned short in_row_size = 56;
+          unsigned short in_col_size = 56;
+          unsigned short no_of_input_layers = 16;
           unsigned short no_of_exp_kernels = 64;
-          unsigned short no_of_squeeze_kernels = 64;
-          unsigned char max_pool_en = 0;
+          unsigned short no_of_squeeze_kernels = 16;
+          unsigned char max_pool_en = 1;
           unsigned char avg_pool_en = 0;
           unsigned char exp_en = 1;
           unsigned char stride2en = 0;
@@ -447,8 +447,14 @@ int main(void)
           unsigned int in_layer_blk_size = in_row_size * in_col_size > 4096 ? 65536 : 4096;
           unsigned short allocated_space_per_row = in_row_size > 64 ? 256 : 64;
 
+          unsigned int out_layer_blk_size = out_row_size * out_col_size > 4096 ? 65536 : 4096;
+          unsigned short out_allocated_space_per_row = out_col_size > 64 ? 256 : 64;
+
           printf("\nin_layer_blk_size: %d", in_layer_blk_size);
-          printf("\nallocated_space_per_row: %d", allocated_space_per_row);
+          printf("\nin_allocated_space_per_row: %d", allocated_space_per_row);
+
+          printf("\nout_layer_blk_size: %d", out_layer_blk_size);
+          printf("\nout_allocated_space_per_row: %d", out_allocated_space_per_row);
 
 
           //Map LED_PIO Physical Address to Virtual Address Space
@@ -610,7 +616,7 @@ int main(void)
         	  printf("\nlayer id: %d\n", k);
 			  for(i = 0; i < out_row_size; i++){
 				  for(j = 0; j < out_col_size; j++){
-					 printf("%d ", *(ddr3_common+ 0x400000 + in_layer_blk_size * k + (i * allocated_space_per_row) + j)) ;
+					 printf("%d ", *(ddr3_common+ 0x400000 + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j)) ;
 				 }
 				  printf("\n");
 			  }
