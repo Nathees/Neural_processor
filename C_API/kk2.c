@@ -17,7 +17,7 @@ unsigned int calculate_axi_settings(unsigned int No_of_rows, unsigned int No_of_
 
 	unsigned int burst_per_row = (No_of_cols <= 128 ? 1 : (No_of_cols <= 256 ? 2 : No_of_cols/128 + 1));
 	unsigned int read_burst_len = No_of_cols <= 16 ? 1 : (No_of_cols <= 32 ? 3 : (No_of_cols <= 64 ? 7 :(No_of_cols <= 128 ? 15 : 15)));
-	unsigned int allocated_space_per_row = (burst_per_row * (read_burst_len + 1) * 8) <= 64 ? 64 : 256;
+	unsigned int allocated_space_per_row = (burst_per_row * (read_burst_len + 1) * 8);
 
 	allocated_space_per_row = stride2en ? allocated_space_per_row * 2: allocated_space_per_row;
 
@@ -221,7 +221,7 @@ int configure_fire(unsigned char* lw_AXI_offset, unsigned short No_of_input_laye
 
 }
 
-int configure_kernel_loader(unsigned short layer_ID, unsigned char* lw_AXI_offset, unsigned char*ddr3_offset, unsigned short No_of_input_layers, unsigned short No_of_expand_layers, unsigned int kernels_offset, unsigned int kernels_space, unsigned short No_of_squeeze_layers, unsigned int ker_3x3_offset, unsigned int ker_1x1_offset, unsigned int exp_bias_offset, unsigned int sq_ker_offset, unsigned int sq_bias_offset, unsigned char* squ_repeat_en_){
+int configure_kernel_loader(unsigned short layer_ID, unsigned char* lw_AXI_offset, unsigned char*ddr3_offset, unsigned short No_of_input_layers, unsigned short No_of_expand_layers, unsigned short No_of_squeeze_layers, unsigned int kernels_offset, unsigned int kernels_space,  unsigned int ker_3x3_offset, unsigned int ker_1x1_offset, unsigned int exp_bias_offset, unsigned int sq_ker_offset, unsigned int sq_bias_offset, unsigned char* squ_repeat_en_){
 
 	unsigned int Record;
 	unsigned char* reg_axi_address;
@@ -355,7 +355,7 @@ int configure_kernel_loader(unsigned short layer_ID, unsigned char* lw_AXI_offse
 
 
 
-int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, unsigned short No_of_input_layers, unsigned short No_of_expand_kernels, unsigned short No_of_squeeze_kernels, unsigned char kernels_offset, unsigned int kernels_space, unsigned char kernel_0_offset,  unsigned char kernel_1_offset, unsigned char kernel_2_offset, unsigned char kernel_3_offset, unsigned char kernel_4_offset){
+int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, unsigned short No_of_input_layers, unsigned short No_of_expand_kernels, unsigned short No_of_squeeze_kernels, unsigned int kernels_offset, unsigned int kernels_space, unsigned int kernel_0_offset,  unsigned int kernel_1_offset, unsigned int kernel_2_offset, unsigned int kernel_3_offset, unsigned int kernel_4_offset){
 
 		char file_name[100];
 		FILE * f;
@@ -363,10 +363,11 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		sprintf(file_name, "ker_3x3_%d.bin", layer_ID);
 		f = fopen(file_name, "rb");
 		if(f == NULL){
-			printf("Error: unable to open %s\n", file_name);
+			printf("\nError: unable to open %s\n", file_name);
 		} else {
 			unsigned int ker_3x3_size =  9 * No_of_input_layers* No_of_expand_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_0_offset, 1, ker_3x3_size ,f);
+			printf("\nCopying ker_3x3_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_0_offset, ker_3x3_size);
 			fclose(f);
 		}
 
@@ -377,6 +378,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int ker_1x1_size =  1 * No_of_input_layers* No_of_expand_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_1_offset, 1, ker_1x1_size, f);
+			printf("\nCopying ker_1x1_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_1_offset, ker_1x1_size);
 			fclose(f);
 		}
 
@@ -386,6 +388,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 			printf("Error: unable to open %s\n", file_name);
 		} else {
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_2_offset, 1, No_of_expand_kernels*2 ,f);
+			printf("\nCopying bias%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_2_offset, No_of_expand_kernels*2);
 			fclose(f);
 		}
 
@@ -396,6 +399,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int sq_ker_size = 2*No_of_expand_kernels * No_of_squeeze_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_3_offset, 1, sq_ker_size,f);
+			printf("\nCopying sq_ker_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_3_offset, sq_ker_size);
 			fclose(f);
 		}
 
@@ -406,6 +410,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int sq_bias_size = No_of_squeeze_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_4_offset, 1, sq_bias_size,f);
+			printf("\nCopying sq_bias_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_4_offset, sq_bias_size);
 			fclose(f);
 		}
 }
@@ -416,8 +421,8 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 int initialise_and_start_coprocessor(unsigned char* lw_AXI_offset, unsigned short No_of_actual_input_rows, unsigned short No_of_actual_input_cols
 		, unsigned short No_of_input_layers, unsigned short No_of_expand_layers, unsigned short No_of_squeeze_layers
 		, unsigned char* start_in_layer_axi_address, unsigned char max_pool_en, unsigned char avg_pool_en, unsigned char expand_en, unsigned char stride2en, unsigned char layer_ID
-		, unsigned char* start_out_layer_axi_address, unsigned char * ddr3_offset, unsigned char kernels_offset, unsigned int kernels_space, unsigned int ker_3x3_offset, unsigned int ker_1x1_offset, unsigned int exp_bias_offset, unsigned int sq_ker_offset,
-		unsigned int sq_bias_offset, unsigned short* No_of_output_Rows_, unsigned short* No_of_output_layers, unsigned short* No_of_output_Cols_, unsigned short* Input_row_space_, unsigned short* Output_row_space_ ) {
+		, unsigned char* start_out_layer_axi_address, unsigned char * ddr3_offset, unsigned int kernels_offset, unsigned int kernels_space, unsigned int ker_3x3_offset, unsigned int ker_1x1_offset, unsigned int exp_bias_offset, unsigned int sq_ker_offset,
+		unsigned int sq_bias_offset, unsigned short* No_of_output_layers, unsigned short* No_of_output_Rows_, unsigned short* No_of_output_Cols_, unsigned short* Input_row_space_, unsigned short* Output_row_space_ ) {
 
 
 	unsigned int Record;
@@ -546,7 +551,7 @@ int main(void)
 			fclose(f);
 
           // Initialising Kernel weights
-         set_weights_in_ddr3(layer_ID, ddr3_fpga, No_of_input_layers, No_of_expand_kernels, No_of_squeeze_kernels, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset);
+         set_weights_in_ddr3(layer_ID, ddr3_common, No_of_input_layers, No_of_expand_kernels, No_of_squeeze_kernels, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset);
 
 
           initialise_and_start_coprocessor(lw_addr, No_of_actual_input_rows, No_of_actual_input_cols, No_of_input_layers, No_of_expand_kernels, No_of_squeeze_kernels, ddr3_fpga, max_pool_en, avg_pool_en, expand_en, stride2en, layer_ID, ddr3_fpga+output_layer_offset_one, ddr3_fpga, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset, &No_of_output_layers, &out_row_size, &out_col_size, &in_allocated_space_per_row, &out_allocated_space_per_row);
@@ -576,4 +581,5 @@ int main(void)
           close(fd);
           return(0);
 }
+
 
