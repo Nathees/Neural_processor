@@ -501,16 +501,17 @@ int main(void)
           fd = open("/dev/mem", (O_RDWR | O_SYNC));
 
           // layer parameters
+          unsigned int No_of_Layers = 2;
           unsigned int layer_ID = 0;
-          unsigned short No_of_actual_input_rows = 12;
-          unsigned short No_of_actual_input_cols = 12;
-          unsigned short No_of_input_layers = 64;
-          unsigned short No_of_expand_kernels = 256;
-          unsigned short No_of_squeeze_kernels = 64;
-          unsigned char max_pool_en = 0;
-          unsigned char avg_pool_en = 0;
-          unsigned char expand_en = 1;
-          unsigned char stride2en = 0;
+          unsigned short No_of_actual_input_rows = 56;
+          unsigned short No_of_actual_input_cols = 56;
+          unsigned short No_of_input_layers[10] = {16, 16};
+          unsigned short No_of_expand_kernels[10] = {64, 64};
+          unsigned short No_of_squeeze_kernels[10] = {16, 32};
+          unsigned char max_pool_en[10] = {0, 1};
+          unsigned char avg_pool_en[10] = {0, 0};
+          unsigned char expand_en[10] = {1, 1};
+          unsigned char stride2en[10] = {0, 0};
 
 
           unsigned int kernels_offset = 0x1000000;
@@ -524,6 +525,8 @@ int main(void)
 
           unsigned int output_layer_offset_one = 0x2000000;
           unsigned int output_layer_offset_two = 0x2100000;
+          unsigned int output_layer_offset;
+          unsigned int input_layer_offset;
 
 
           // calculated parameters
@@ -531,7 +534,7 @@ int main(void)
           unsigned short out_col_size;
           unsigned short No_of_output_layers;
 
-          unsigned short in_allocated_space_per_row = 16;
+          unsigned short in_allocated_space_per_row = 64;
           unsigned short out_allocated_space_per_row;
 
 
@@ -539,42 +542,73 @@ int main(void)
           lw_addr = mmap( NULL, REG_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, (ALT_LWFPGASLVS_OFST) );
           ddr3_common = mmap( NULL, DDR3_SPAN, ( PROT_READ | PROT_WRITE ), MAP_SHARED, fd, (ddr3_fpga) );
 
+          unsigned short file_read_row_size = No_of_actual_input_cols % 4 == 0 ? No_of_actual_input_cols : (No_of_actual_input_cols/4 + 1) * 4;
+
           unsigned int in_layer_blk_size = No_of_actual_input_rows * No_of_actual_input_cols > 4096 ? 65536 : 4096;
           printf("\nin_layer_blk_size: %d", in_layer_blk_size);
           printf("\nin_allocated_space_per_row: %d", in_allocated_space_per_row);
           FILE *f = fopen("input_layer_c.bin", "rb");
-			for(k = 0; k < No_of_input_layers; k++){
+			for(k = 0; k < No_of_input_layers[0]; k++){
 			  for(i = 0; i < No_of_actual_input_rows; i++){
-					  fread((ddr3_common+ k * in_layer_blk_size + (i * in_allocated_space_per_row)), 1, No_of_actual_input_cols, f);
+					  fread((ddr3_common+ k * in_layer_blk_size + (i * in_allocated_space_per_row)), 1, file_read_row_size, f);
 			   }
 			}
 			fclose(f);
 
           // Initialising Kernel weights
-         set_weights_in_ddr3(layer_ID, ddr3_common, No_of_input_layers, No_of_expand_kernels, No_of_squeeze_kernels, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset);
+		for(i = 0; i < No_of_Layers; i++){
+			set_weights_in_ddr3(i, ddr3_common, No_of_input_layers[i], No_of_expand_kernels[i], No_of_squeeze_kernels[i], kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset);
+		}
 
 
-          initialise_and_start_coprocessor(lw_addr, No_of_actual_input_rows, No_of_actual_input_cols, No_of_input_layers, No_of_expand_kernels, No_of_squeeze_kernels, ddr3_fpga, max_pool_en, avg_pool_en, expand_en, stride2en, layer_ID, ddr3_fpga+output_layer_offset_one, ddr3_fpga, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset, &No_of_output_layers, &out_row_size, &out_col_size, &in_allocated_space_per_row, &out_allocated_space_per_row);
+        // initialise_and_start_coprocessor(lw_addr, No_of_actual_input_rows, No_of_actual_input_cols, No_of_input_layers, No_of_expand_kernels, No_of_squeeze_kernels, ddr3_fpga, max_pool_en, avg_pool_en, expand_en, stride2en, layer_ID, ddr3_fpga+output_layer_offset_one, ddr3_fpga, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset, &No_of_output_layers, &out_row_size, &out_col_size, &in_allocated_space_per_row, &out_allocated_space_per_row);
 
-          usleep(100000);
-          printf("reading value in ddr3 output address space\n");
+        // usleep(100000);
+
+
+        printf("reading value in ddr3 output address space\n");
           //int i = 0;
 
+        for(layer_ID = 0; layer_ID < No_of_Layers; layer_ID++){
+        	if(layer_ID % 2 == 0){
+        		output_layer_offset = output_layer_offset_one;
+        	} else {
+        		output_layer_offset = output_layer_offset_two;
+        	}
 
-          unsigned int out_layer_blk_size = out_row_size * out_col_size > 4096 ? 65536 : 4096;
-          printf("\nout_layer_blk_size: %d", out_layer_blk_size);
-          printf("\nout_allocated_space_per_row: %d", out_allocated_space_per_row);
-          for(k = 0; k < No_of_output_layers; k++){
-        	  printf("\nlayer id: %d\n", k);
-			  for(i = 0; i < out_row_size; i++){
-				  for(j = 0; j < out_col_size; j++){
-					 //printf("Reading from address:%d\n", (ddr3_common+ output_layer_offset_one + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j));
-					 printf("%d ", *(ddr3_common+ output_layer_offset_one + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j)) ;
-				 }
+        	if(layer_ID  == 0){
+        		input_layer_offset = 0;
+        	} else if(layer_ID % 2 == 0){
+        		input_layer_offset = output_layer_offset_two;
+        	} else {
+        		input_layer_offset = output_layer_offset_one;
+        	}
+	        initialise_and_start_coprocessor(lw_addr, No_of_actual_input_rows, No_of_actual_input_cols, No_of_input_layers[layer_ID], No_of_expand_kernels[layer_ID], No_of_squeeze_kernels[layer_ID], ddr3_fpga + input_layer_offset, max_pool_en[layer_ID], avg_pool_en[layer_ID], expand_en[layer_ID], stride2en[layer_ID], layer_ID, ddr3_fpga+output_layer_offset, ddr3_fpga, kernels_offset, kernels_space, kernel_0_offset, kernel_1_offset, kernel_2_offset, kernel_3_offset, kernel_4_offset, &No_of_output_layers, &out_row_size, &out_col_size, &in_allocated_space_per_row, &out_allocated_space_per_row);
+
+	        No_of_actual_input_rows = out_row_size;
+	        No_of_actual_input_cols = out_col_size;
+	        //No_of_input_layers = No_of_squeeze_kernels[i];
+
+	        usleep(100000);
+	        printf("reading value in ddr3 output address space\n");
+		    unsigned int out_layer_blk_size = out_row_size * out_col_size > 4096 ? 65536 : 4096;
+		    printf("\n####################################################################\n");
+		    printf("######################## FIRE %d ##############################\n", layer_ID);
+		    printf("##################################################################");
+		    printf("\nout_layer_blk_size: %d", out_layer_blk_size);
+		    printf("\nout_allocated_space_per_row: %d", out_allocated_space_per_row);
+		    for(k = 0; k < No_of_output_layers; k++){
+		    	printf("\nlayer id: %d\n", k);
+				for(i = 0; i < out_row_size; i++){
+					for(j = 0; j < out_col_size; j++){
+						 //printf("Reading from address:%d\n", (ddr3_common+ output_layer_offset_one + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j));
+						printf("%d ", *(ddr3_common+ output_layer_offset + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j)) ;
+					}
+					  printf("\n");
+				}
 				  printf("\n");
-			  }
-			  printf("\n");
-          }
+		    }
+		}
 
           munmap(lw_addr, REG_SPAN);
           munmap(ddr3_common, DDR3_SPAN);
