@@ -355,11 +355,19 @@ module add_en_12(
 
 	always @(posedge clk_i) begin : proc_r_man_x
 		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4) || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
-			r_man_x <= 0;
 			r_sgn_x <= 0;
 		end else begin
-			r_man_x <= r_new_man[6:0];
 			r_sgn_x <= r_sgn_4;
+		end
+	end
+
+	always@(posedge clk_i) begin
+		if(~rst_n_i || r_exp_shft == 0 || (r_skip_neg_en_p4 & r_sgn_4) || (r_exp_4 < (15 - r_exp_shft)) && ~r_exp_shft[4]) begin
+			r_man_x <= 0;
+		end else if((r_exp_shft[4] && r_exp_4 == 31)) begin
+			r_man_x <= 7'h7ff;
+		end else begin
+			r_man_x <= r_new_man[6:0];
 		end
 	end
 
