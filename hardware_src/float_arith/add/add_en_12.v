@@ -165,7 +165,7 @@ module add_en_12(
 	always @(posedge clk_i) begin : proc_r_b_zero
 		if(~rst_n_i) begin
 			r_b_zero <= 0;
-		end else if(data_2_i[10:0] == 0) begin
+		end else if(data_2_i[10:0] == 0 || ~add_en_i) begin
 			r_b_zero <= 1;
 		end else begin
 			r_b_zero <= 0;
