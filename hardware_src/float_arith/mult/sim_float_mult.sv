@@ -38,7 +38,10 @@ module sim_float_mult();
 
 	wire								fp_expected_sgn;
 	wire			[4:0] 				fp_expected_exp;
-	wire 			[5:0]				fp_expected_man;
+	wire 			[6:0]				fp_expected_man;
+
+    wire            [12:0]              fp_x_expected_inmt;
+    wire            [12:0]              fp_x_expected_inmt_1;
 
 	
 
@@ -91,13 +94,13 @@ module sim_float_mult();
     end
 
     // bits to real
-    assign real_a_bits[63:63] = (fp_a == 0)? 0 : fp_a[11:11];
-    assign real_a_bits[62:52] = (fp_a == 0)? 0 : fp_a[10:6] + 1023 - 15;
-    assign real_a_bits[51:0] = (fp_a == 0)? 0 : {fp_a[5:0] , 46'b0};
+    assign real_a_bits[63:63] = (fp_a[10:0] == 0)? 0 : fp_a[11:11];
+    assign real_a_bits[62:52] = (fp_a[10:0] == 0)? 0 : fp_a[10:6] + 1023 - 15;
+    assign real_a_bits[51:0] =  (fp_a[10:0] == 0)? 0 : {fp_a[5:0] , 46'b0};
 
-    assign real_b_bits[63:63] = (fp_b == 0) ? 0 : fp_b[11:11];
-    assign real_b_bits[62:52] = (fp_b == 0) ? 0 : fp_b[10:6] + 1023 - 15;
-    assign real_b_bits[51:0] = (fp_b == 0) ? 0 : {fp_b[5:0] , 46'b0};
+    assign real_b_bits[63:63] = (fp_b[10:0] == 0) ? 0 : fp_b[11:11];
+    assign real_b_bits[62:52] = (fp_b[10:0] == 0) ? 0 : fp_b[10:6] + 1023 - 15;
+    assign real_b_bits[51:0] =  (fp_b[10:0] == 0) ? 0 : {fp_b[5:0] , 46'b0};
 
     assign real_x_bits[63:63] = (fp_x == 0 ) ? 0 : fp_x[11:11];
     assign real_x_bits[62:52] = (fp_x == 0 ) ? 0 : fp_x[10:6] + 1023 - 15;
@@ -149,9 +152,12 @@ module sim_float_mult();
     assign w_real_x_expected = $realtobits(real_x_expected);
     assign fp_expected_sgn = (w_real_x_expected[62:52] < 1008) ? 0 : w_real_x_expected[63:63];
     assign fp_expected_exp = (w_real_x_expected[62:52] < 1008) ? 0 : ((w_real_x_expected[62:52] > 1039) ? 31 : w_real_x_expected[62:52] - 1023 + 15);
-    assign fp_expected_man = (w_real_x_expected[62:52] < 1008) ? 0 :w_real_x_expected[51:46];
+    assign fp_expected_man = (w_real_x_expected[62:52] < 1008) ? 0 :w_real_x_expected[51:45];
     //assign fp_expected_man = w_real_x_expected[45:45] ? w_real_x_expected[51:46] + 1: w_real_x_expected[51:46];
-    assign fp_x_expected = (w_real_x_expected == 0 ) ? 12'b0 :  {fp_expected_sgn, fp_expected_exp, fp_expected_man};
+    assign fp_x_expected_inmt = {fp_expected_sgn, fp_expected_exp, fp_expected_man};
+    assign fp_x_expected_inmt_1 = fp_x_expected_inmt + 1;
+
+    assign fp_x_expected = fp_x_expected_inmt[11:1] == 11'h7ff ? fp_x_expected_inmt[12:1] : fp_x_expected_inmt_1[12:1];
 
     // error bit
     wire[11:0] diff = (fP_expected_p1 >= fp_x)  ? fP_expected_p1 - fp_x :  fp_x - fP_expected_p1;
