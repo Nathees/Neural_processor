@@ -87,10 +87,14 @@ module add_en_12(
 	reg 					r_skip_neg_en_p4;
 
 //--------- fifth pipe line
-	reg 		[5:0] 		r_man_x; 
+	reg 		[6:0] 		r_man_x; 
 	reg 		[4:0]		r_exp_x;
 	reg 					r_sgn_x;	
 
+//--------- final_round_off
+	wire 		[12:0] 		w_add_out;
+	wire 		[11:0] 		w_exp_mant_add1;
+	wire 		[10:0]      w_exp_mant;
 
 	// separating input bus
 	assign w_sgn_a = data_1_i[11:11];
@@ -306,17 +310,17 @@ module add_en_12(
 			r_new_man <= 0;
 		end else begin
 			casex(r_man_inmt)
-				9'b1xxxxxxxx : begin r_exp_shft <= 16; r_new_man <= r_man_inmt[7:2]; end
-				9'b01xxxxxxx : begin r_exp_shft <= 15; r_new_man <= r_man_inmt[6:1]; end
-				9'b001xxxxxx : begin r_exp_shft <= 14; r_new_man <= {r_man_inmt[5:0]}; end
-				9'b0001xxxxx : begin r_exp_shft <= 13; r_new_man <= {r_man_inmt[4:0], 1'b0}; end
-				9'b00001xxxx : begin r_exp_shft <= 12; r_new_man <= {r_man_inmt[3:0], 2'b0}; end
-				9'b000001xxx : begin r_exp_shft <= 11; r_new_man <= {r_man_inmt[2:0], 3'b0}; end
-				9'b0000001xx : begin r_exp_shft <= 10; r_new_man <= {r_man_inmt[1:0], 4'b0}; end
-				9'b00000001x : begin r_exp_shft <= 9; r_new_man <=  {r_man_inmt[0:0], 5'b0}; end
-				9'b000000001 : begin r_exp_shft <= 8; r_new_man <=  {6'b0}; end
-				9'b000000000 : begin r_exp_shft <= 0; r_new_man <=  {6'b0}; end
-				default : begin r_exp_shft <= 0; r_new_man <=  {6'b0}; end
+				9'b1xxxxxxxx : begin r_exp_shft <= 16; r_new_man <= r_man_inmt[7:1]; end
+				9'b01xxxxxxx : begin r_exp_shft <= 15; r_new_man <= r_man_inmt[6:0]; end
+				9'b001xxxxxx : begin r_exp_shft <= 14; r_new_man <= {r_man_inmt[5:0], 1'b0}; end
+				9'b0001xxxxx : begin r_exp_shft <= 13; r_new_man <= {r_man_inmt[4:0], 2'b0}; end
+				9'b00001xxxx : begin r_exp_shft <= 12; r_new_man <= {r_man_inmt[3:0], 3'b0}; end
+				9'b000001xxx : begin r_exp_shft <= 11; r_new_man <= {r_man_inmt[2:0], 4'b0}; end
+				9'b0000001xx : begin r_exp_shft <= 10; r_new_man <= {r_man_inmt[1:0], 5'b0}; end
+				9'b00000001x : begin r_exp_shft <= 9; r_new_man <=  {r_man_inmt[0:0], 6'b0}; end
+				9'b000000001 : begin r_exp_shft <= 8; r_new_man <=  {7'b0}; end
+				9'b000000000 : begin r_exp_shft <= 0; r_new_man <=  {7'b0}; end
+				default : begin r_exp_shft <= 0; r_new_man <=  {7'b0}; end
 			endcase // r_man_inmt
 		end
 	end
@@ -367,6 +371,9 @@ module add_en_12(
 		end
 	end
 
-	assign data_sum_o = {r_sgn_x, r_exp_x, r_man_x};
+	assign w_add_out = {r_sgn_x, r_exp_x, r_man_x[6:0]};
+	assign w_exp_mant_add1 = w_add_out[11:0] + 1;
+	assign w_exp_mant = w_add_out[11:1] == 11'h7ff ? w_add_out[11:1] : w_exp_mant_add1[11:1];
+	assign data_sum_o = {r_sgn_x, w_exp_mant};
 
 endmodule
