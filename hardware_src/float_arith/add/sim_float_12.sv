@@ -8,6 +8,8 @@ module sim_float_12 ();
 	reg 			[11:0] 			fp_a;
 	reg 			[11:0] 			fp_b;
 	wire 			[11:0] 			fp_x;
+	wire 			[12:0] 			fp_x_expected_inmt;
+	wire 			[12:0] 			fp_x_expected_inmt_1;
 	wire 			[11:0] 			fp_x_expected;
 
 	reg 			[11:0] 			fP_expected_p1;
@@ -32,10 +34,11 @@ module sim_float_12 ();
 	wire 			[63:0] 				real_b_bits;
 	wire 			[63:0] 				real_x_bits;
 	wire			[63:0]				w_real_x_expected;
+	wire			[18:0]				w_real_rounded;
 
 	wire								fp_expected_sgn;
 	wire			[4:0] 				fp_expected_exp;
-	wire 			[5:0]				fp_expected_man;
+	wire 			[6:0]				fp_expected_man;
 
 	
 
@@ -134,11 +137,14 @@ module sim_float_12 ();
 
     // expected real
     assign w_real_x_expected = $realtobits(real_x_expected);
-    assign fp_expected_sgn = (w_real_x_expected[62:52] < 1008) ? 0 : w_real_x_expected[63:63];
-    assign fp_expected_exp = (w_real_x_expected[62:52] > 1039 ) ? 31 : ((w_real_x_expected[62:52] < 1008) ? 0 :(w_real_x_expected[62:52] - 1023 + 15));
-    assign fp_expected_man = (w_real_x_expected[62:52] < 1008) ? 0 : w_real_x_expected[51:46];
+    assign w_real_rounded = w_real_x_expected[63:45];
+    assign fp_expected_sgn = (w_real_rounded[17:7] < 1008) ? 0 : w_real_rounded[18:18];
+    assign fp_expected_exp = (w_real_rounded[17:7] > 1039 ) ? 31 : ((w_real_rounded[17:7] < 1008) ? 0 :(w_real_rounded[17:7] - 1023 + 15));
+    assign fp_expected_man = (w_real_rounded[17:7] < 1008) ? 0 : w_real_rounded[6:0];
     //assign fp_expected_man = w_real_x_expected[45:45] ? w_real_x_expected[51:46] + 1: w_real_x_expected[51:46];
-    assign fp_x_expected = (w_real_x_expected == 0 ) ? 12'b0 :  {fp_expected_sgn, fp_expected_exp, fp_expected_man};
+    assign fp_x_expected_inmt = {fp_expected_sgn, fp_expected_exp, fp_expected_man};
+    assign fp_x_expected_inmt_1 = fp_x_expected_inmt + 1;
+    assign fp_x_expected = fp_x_expected_inmt[11:1] == 11'h7ff ? fp_x_expected_inmt[12:1] : fp_x_expected_inmt_1[12:1];
 
     // error bit
     wire[11:0] diff = (fP_expected_p3 >= fp_x)  ? fP_expected_p3 - fp_x :  fp_x - fP_expected_p3;

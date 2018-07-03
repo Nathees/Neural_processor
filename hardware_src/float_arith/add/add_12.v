@@ -45,8 +45,8 @@ module add_12(
 
 //--------- second pipe line
 
-	reg 		[9:0]		r_shft_mnt_a;
-	reg 		[9:0]		r_shft_mnt_b;
+	reg 		[10:0]		r_shft_mnt_a;
+	reg 		[10:0]		r_shft_mnt_b;
 
 
 	reg    					r_mag_a_geq;
@@ -60,11 +60,11 @@ module add_12(
 
 //---------- third pipe line
 
-	wire 		[9:0] 		w_man_add;
-	wire 		[9:0] 		w_man_sub;
+	wire 		[10:0] 		w_man_add;
+	wire 		[10:0] 		w_man_sub;
 
 	wire 		[9:0] 		w_man_inmt;
-	reg 		[8:0] 		r_man_inmt;
+	reg 		[9:0] 		r_man_inmt;
 	wire 		[8:0] 		w_man_inmt_roundoff;
 
 	reg 		[5:0] 		r_exp_3;
@@ -166,18 +166,19 @@ module add_12(
 		if(~rst_n_i || r_a_zero) begin
 			r_shft_mnt_a <= 0;
 		end else if(r_exp_a_gez)begin
-			r_shft_mnt_a <= {1'b0, 1'b1, r_man_a, 2'b0};
+			r_shft_mnt_a <= {1'b0, 1'b1, r_man_a, 3'b0};
 		end else  begin
 			case(r_exp_diff)
-				6'b000000: r_shft_mnt_a <= {1'b0, 1'b1, r_man_a, 2'b0};
-				6'b000001: r_shft_mnt_a <= {1'b0, 1'b0, 1'b1, r_man_a[5:0], 1'b0};
-				6'b000010: r_shft_mnt_a <= {1'b0, 2'b0, 1'b1, r_man_a[5:0]};
-				6'b000011: r_shft_mnt_a <= {1'b0, 3'b0, 1'b1, r_man_a[5:2], r_man_a[1:1] | (w_man_op_type & |(r_man_a[0:0]))};
-				6'b000100: r_shft_mnt_a <= {1'b0, 4'b0, 1'b1, r_man_a[5:3], r_man_a[2:2] | (w_man_op_type & |(r_man_a[1:0]))};
-				6'b000101: r_shft_mnt_a <= {1'b0, 5'b0, 1'b1, r_man_a[5:4], r_man_a[3:3] | (w_man_op_type & |(r_man_a[2:0]))};
-				6'b000110: r_shft_mnt_a <= {1'b0, 6'b0, 1'b1, r_man_a[5:5], r_man_a[4:4] | (w_man_op_type & |(r_man_a[3:0]))};
-				6'b000111: r_shft_mnt_a <= {1'b0, 7'b0, 1'b1, r_man_a[5:5] | (w_man_op_type & |(r_man_a[5:0]))};
-				default	 : r_shft_mnt_a <= {1'b0, 8'b0, w_man_op_type};
+				6'b000000: r_shft_mnt_a <= {1'b0, 1'b1, r_man_a, 3'b0};
+				6'b000001: r_shft_mnt_a <= {1'b0, 1'b0, 1'b1, r_man_a[5:0], 2'b0};
+				6'b000010: r_shft_mnt_a <= {1'b0, 2'b0, 1'b1, r_man_a[5:0], 1'b0};
+				6'b000011: r_shft_mnt_a <= {1'b0, 3'b0, 1'b1, r_man_a[5:0]};
+				6'b000100: r_shft_mnt_a <= {1'b0, 4'b0, 1'b1, r_man_a[5:2], r_man_a[1:1] | (w_man_op_type & |(r_man_a[0:0]))};
+				6'b000101: r_shft_mnt_a <= {1'b0, 5'b0, 1'b1, r_man_a[5:3], r_man_a[2:2] | (w_man_op_type & |(r_man_a[1:0]))};
+				6'b000110: r_shft_mnt_a <= {1'b0, 6'b0, 1'b1, r_man_a[5:4], r_man_a[3:3] | (w_man_op_type & |(r_man_a[2:0]))};
+				6'b000111: r_shft_mnt_a <= {1'b0, 7'b0, 1'b1, r_man_a[5:5], r_man_a[4:4] | (w_man_op_type & |(r_man_a[3:0]))};
+				6'b001000: r_shft_mnt_a <= {1'b0, 8'b0, 1'b1, r_man_a[5:5] | (w_man_op_type & |(r_man_a[5:0]))};
+				default	 : r_shft_mnt_a <= {1'b0, 9'b0, 1'b0, w_man_op_type};
 			endcase // r_exp_diff
 		end
 	end
@@ -186,19 +187,20 @@ module add_12(
 		if(~rst_n_i || r_b_zero) begin
 			r_shft_mnt_b <= 0;
 		end else if(~r_exp_a_gez)begin
-			r_shft_mnt_b <= {1'b0, 1'b1, r_man_b, 2'b0};
+			r_shft_mnt_b <= {1'b0, 1'b1, r_man_b, 3'b0};
 		end else  begin
 			case(r_exp_diff)
-				6'b000000: r_shft_mnt_b <= {1'b0, 1'b1, r_man_b, 2'b0};
-				6'b000001: r_shft_mnt_b <= {1'b0, 1'b0, 1'b1, r_man_b[5:0], 1'b0};
-				6'b000010: r_shft_mnt_b <= {1'b0, 2'b0, 1'b1, r_man_b[5:0]};
-				6'b000011: r_shft_mnt_b <= {1'b0, 3'b0, 1'b1, r_man_b[5:2], r_man_b[1:1] | (w_man_op_type & |(r_man_b[0:0]))};
-				6'b000100: r_shft_mnt_b <= {1'b0, 4'b0, 1'b1, r_man_b[5:3], r_man_b[2:2] | (w_man_op_type & |(r_man_b[1:0]))};
-				6'b000101: r_shft_mnt_b <= {1'b0, 5'b0, 1'b1, r_man_b[5:4], r_man_b[3:3] | (w_man_op_type & |(r_man_b[2:0]))};
-				6'b000110: r_shft_mnt_b <= {1'b0, 6'b0, 1'b1, r_man_b[5:5], r_man_b[4:4] | (w_man_op_type & |(r_man_b[3:0]))};
-				6'b000111: r_shft_mnt_b <= {1'b0, 7'b0, 1'b1, r_man_b[5:5] | (w_man_op_type & |(r_man_b[5:0]))};
-				default	 : r_shft_mnt_b <= {1'b0, 8'b0, w_man_op_type};
-			endcase // r_exp_diff
+				6'b000000: r_shft_mnt_b <= {1'b0, 1'b1, r_man_b, 3'b0};
+				6'b000001: r_shft_mnt_b <= {1'b0, 1'b0, 1'b1, r_man_b[5:0], 2'b0};
+				6'b000010: r_shft_mnt_b <= {1'b0, 2'b0, 1'b1, r_man_b[5:0], 1'b0};
+				6'b000011: r_shft_mnt_b <= {1'b0, 3'b0, 1'b1, r_man_b[5:0]};
+				6'b000100: r_shft_mnt_b <= {1'b0, 4'b0, 1'b1, r_man_b[5:2], r_man_b[1:1] | (w_man_op_type & |(r_man_b[0:0]))};
+				6'b000101: r_shft_mnt_b <= {1'b0, 5'b0, 1'b1, r_man_b[5:3], r_man_b[2:2] | (w_man_op_type & |(r_man_b[1:0]))};
+				6'b000110: r_shft_mnt_b <= {1'b0, 6'b0, 1'b1, r_man_b[5:4], r_man_b[3:3] | (w_man_op_type & |(r_man_b[2:0]))};
+				6'b000111: r_shft_mnt_b <= {1'b0, 7'b0, 1'b1, r_man_b[5:5], r_man_b[4:4] | (w_man_op_type & |(r_man_b[3:0]))};
+				6'b001000: r_shft_mnt_b <= {1'b0, 8'b0, 1'b1, r_man_b[5:5] | (w_man_op_type & |(r_man_b[5:0]))};
+				default	 : r_shft_mnt_b <= {1'b0, 9'b0, 1'b0, w_man_op_type};
+			endcase // r_exp_diffb0, 8'b0, w_man_op_type};
 		end
 	end
 
@@ -244,12 +246,12 @@ module add_12(
 	assign w_man_sub = (r_mag_a_geq ? r_shft_mnt_a - r_shft_mnt_b : r_shft_mnt_b - r_shft_mnt_a);
 
 
-	assign w_man_inmt = r_man_op_type ? w_man_sub : w_man_add;
+	assign w_man_inmt = r_man_op_type ? w_man_sub[10:1] : w_man_add[10:1];
 	always @(posedge clk_i) begin : proc_r_man_inmt
 		if(~rst_n_i) begin
 			r_man_inmt <= 0;
 		end else begin
-			r_man_inmt <= w_man_inmt[9:1];
+			r_man_inmt <= w_man_inmt[9:0];
 		end
 	end
 
@@ -279,16 +281,16 @@ module add_12(
 			r_exp_shft <= 0;
 			r_new_man <= 0;
 		end else begin
-			casex(r_man_inmt)
-				9'b1xxxxxxxx : begin r_exp_shft <= 16; r_new_man <= r_man_inmt[7:1]; end
-				9'b01xxxxxxx : begin r_exp_shft <= 15; r_new_man <= r_man_inmt[6:0]; end
-				9'b001xxxxxx : begin r_exp_shft <= 14; r_new_man <= {r_man_inmt[5:0], 1'b0}; end
-				9'b0001xxxxx : begin r_exp_shft <= 13; r_new_man <= {r_man_inmt[4:0], 2'b0}; end
-				9'b00001xxxx : begin r_exp_shft <= 12; r_new_man <= {r_man_inmt[3:0], 3'b0}; end
-				9'b000001xxx : begin r_exp_shft <= 11; r_new_man <= {r_man_inmt[2:0], 4'b0}; end
-				9'b0000001xx : begin r_exp_shft <= 10; r_new_man <= {r_man_inmt[1:0], 5'b0}; end
-				9'b00000001x : begin r_exp_shft <= 9; r_new_man <=  {r_man_inmt[0:0], 6'b0}; end
-				9'b000000001 : begin r_exp_shft <= 8; r_new_man <=  {7'b0}; end
+			casex(r_man_inmt[9:1])
+				9'b1xxxxxxxx : begin r_exp_shft <= 16; r_new_man <= r_man_inmt[8:2]; end
+				9'b01xxxxxxx : begin r_exp_shft <= 15; r_new_man <= r_man_inmt[7:1]; end
+				9'b001xxxxxx : begin r_exp_shft <= 14; r_new_man <= {r_man_inmt[6:0]}; end
+				9'b0001xxxxx : begin r_exp_shft <= 13; r_new_man <= {r_man_inmt[5:0], 1'b0}; end
+				9'b00001xxxx : begin r_exp_shft <= 12; r_new_man <= {r_man_inmt[4:0], 2'b0}; end
+				9'b000001xxx : begin r_exp_shft <= 11; r_new_man <= {r_man_inmt[3:0], 3'b0}; end
+				9'b0000001xx : begin r_exp_shft <= 10; r_new_man <= {r_man_inmt[2:0], 4'b0}; end
+				9'b00000001x : begin r_exp_shft <= 9; r_new_man <=  {r_man_inmt[1:0], 5'b0}; end
+				9'b000000001 : begin r_exp_shft <= 8; r_new_man <=  {r_man_inmt[0:0], 6'b0}; end
 				9'b000000000 : begin r_exp_shft <= 0; r_new_man <=  {7'b0}; end
 				default : begin r_exp_shft <= 0; r_new_man <=  {7'b0}; end
 			endcase // r_man_inmt
