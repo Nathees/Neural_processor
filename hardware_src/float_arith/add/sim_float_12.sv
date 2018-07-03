@@ -44,13 +44,25 @@ module sim_float_12 ();
 
 
 	// module instatiation
-	add_12 add_12_inst(
+	//add_12 add_12_inst(
+	//	.clk_i(clk),
+	//	.rst_n_i(reset_n),
+	//	.data_1_i(fp_a),
+	//	.data_2_i(fp_b),
+	//	.data_sum_o(fp_x)
+	//);
+
+	add_en_12 add_en_12_inst(
 		.clk_i(clk),
 		.rst_n_i(reset_n),
+		.add_en_i(1'b1),
+		.skip_neg_en_i(1'b0),
 		.data_1_i(fp_a),
 		.data_2_i(fp_b),
 		.data_sum_o(fp_x)
 	);
+
+
 	integer a;
 
 
