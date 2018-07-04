@@ -292,15 +292,21 @@ module average_pool(
 	end
 
 	// Output FIFO Write data
+
+	wire [7:0] w_row_add_data_rounded;
+	wire [7:0] output_data_i_rounded;
+
+	assign w_row_add_data_rounded = w_row_add_data[10:3] == 8'hff ? w_row_add_data[10:3] : w_row_add_data[10:3] + 1;
+	assign output_data_i_rounded = output_data_i[10:3] == 8'hff ? output_data_i[10:3] : output_data_i[10:3] + 1;
 	always @(posedge clk_i) begin : OUT_FIFO_WR_DATA
 		if(~rst_n_i) begin
 			r_out_fifo_wr_data <= 0;
 		end 
 		else if(r_avg_en) begin
-			r_out_fifo_wr_data <= w_row_add_data[11:4];
+			r_out_fifo_wr_data <= {w_row_add_data[11:11], w_row_add_data_rounded[7:1]}; //w_row_add_data[11:4];
 		end
 		else begin
-			r_out_fifo_wr_data <= output_data_i[11:4];
+			r_out_fifo_wr_data <= {output_data_i[11:11], output_data_i_rounded[7:1]}; //output_data_i[11:4];
 		end
 	end
 
