@@ -40,6 +40,9 @@ module mult_12(
 	reg 					r_zero_result_flag;
 	reg 					r_exp_eq_14;
 
+	reg 					r_exp_gt31;
+	reg 					r_exp_eq_31;
+
 	//------------ third satge pipe line
 	reg 		[6:0] 		r_mant_x;
 	reg 		[4:0]  		r_exp_x;
@@ -131,6 +134,26 @@ module mult_12(
 		end
 	end
 
+	always @(posedge clk_i) begin : proc_r_exp_x2
+		if(~rst_n_i) begin
+			r_exp_eq_31 <= 0;
+		end else if(r_exp_x1 == 46) begin
+			r_exp_eq_31 <= 31;
+		end else begin
+			r_exp_eq_31 <= 0;
+		end
+	end
+
+	always @(posedge clk_i) begin : proc_r_exp_x2
+		if(~rst_n_i) begin
+			r_exp_gt31 <= 0;
+		end else if(r_exp_x1 > 46) begin
+			r_exp_gt31 <= 31;
+		end else begin
+			r_exp_gt31 <= 0;
+		end
+	end
+
 	
 	always @(posedge clk_i) begin
 		if(~rst_n_i) begin
@@ -185,7 +208,7 @@ module mult_12(
 	always @(posedge clk_i) begin : proc_r_mant_x
 		if(~rst_n_i || r_multiply_by_zero_2 || (r_zero_result_flag & ~(r_incr_exp_flag & w_mult_ab[8:8]))) begin
 			r_mant_x <= 0;
-		end else if(w_mult_ab[8:8] && r_exp_x2 == 5'h1f) begin
+		end else if((w_mult_ab[8:8] && r_exp_eq_31) || r_exp_gt31) begin
 			r_mant_x <= 6'h3f;
 		end else if(w_mult_ab[8:8]) begin
 			r_mant_x <= w_mult_ab[7:1];
