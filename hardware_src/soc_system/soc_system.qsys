@@ -54,6 +54,16 @@
    type="axi"
    dir="end" />
  <interface
+   name="hps_0_f2h_irq0"
+   internal="hps_0.f2h_irq0"
+   type="interrupt"
+   dir="start" />
+ <interface
+   name="hps_0_f2h_irq1"
+   internal="hps_0.f2h_irq1"
+   type="interrupt"
+   dir="start" />
+ <interface
    name="hps_0_f2h_sdram0_clock"
    internal="hps_0.f2h_sdram0_clock"
    type="clock"
@@ -104,7 +114,7 @@
    type="clock"
    dir="start" />
  <interface name="memory" internal="hps_0.memory" type="conduit" dir="end" />
- <module name="hps_0" kind="altera_hps" version="17.1" enabled="1">
+ <module name="hps_0" kind="altera_hps" version="18.0" enabled="1">
   <parameter name="ABSTRACT_REAL_COMPARE_TEST" value="false" />
   <parameter name="ABS_RAM_MEM_INIT_FILENAME" value="meminit" />
   <parameter name="ACV_PHY_CLK_ADD_FR_PHASE" value="0.0" />
@@ -216,7 +226,7 @@
   <parameter name="F2SCLK_WARMRST_Enable" value="false" />
   <parameter name="F2SDRAM_Type" value="AXI-3,AXI-3" />
   <parameter name="F2SDRAM_Width" value="64,64" />
-  <parameter name="F2SINTERRUPT_Enable" value="false" />
+  <parameter name="F2SINTERRUPT_Enable" value="true" />
   <parameter name="F2S_Width" value="2" />
   <parameter name="FIX_READ_LATENCY" value="8" />
   <parameter name="FORCED_NON_LDC_ADDR_CMD_MEM_CK_INVERT" value="false" />

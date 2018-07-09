@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <string.h>
+#include "sysnet.h"
 //#include "in_out_layer.h"
 
 #define ALT_LWFPGASLVS_OFST 0xFF200000
@@ -501,17 +502,17 @@ int main(void)
           fd = open("/dev/mem", (O_RDWR | O_SYNC));
 
           // layer parameters
-          unsigned int No_of_Layers = 1; // 1 2 3 4 5 6 7 8 9
+          unsigned int No_of_Layers = 9; // 1 2 3 4 5 6 7 8 9
           unsigned int layer_ID = 0;
-          unsigned short No_of_actual_input_rows = 27;
-          unsigned short No_of_actual_input_cols = 27;
-          unsigned short No_of_input_layers[10] = {32, 16, 16, 32, 32, 48, 48, 64, 64};
-          unsigned short No_of_expand_kernels[10] = {128, 64,64, 128, 128, 192, 192, 256, 256};
-          unsigned short No_of_squeeze_kernels[10] = {32, 16, 32, 32, 48, 48, 64, 64, 1000};
-          unsigned char max_pool_en[10] = {0, 1, 0, 0, 1, 0, 0, 0, 0};
+          unsigned short No_of_actual_input_rows = 227;
+          unsigned short No_of_actual_input_cols = 227;
+          unsigned short No_of_input_layers[10] = {3, 16, 16, 32, 32, 48, 48, 64, 64};
+          unsigned short No_of_expand_kernels[10] = {64, 64,64, 128, 128, 192, 192, 256, 256};
+          unsigned short No_of_squeeze_kernels[10] = {16, 16, 32, 32, 48, 48, 64, 64, 1000};
+          unsigned char max_pool_en[10] = {1, 0, 1, 0, 1, 0, 0, 0, 0};
           unsigned char avg_pool_en[10] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
           unsigned char expand_en[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-          unsigned char stride2en[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+          unsigned char stride2en[10] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
 
 
           unsigned int kernels_offset = 0x1000000;
@@ -534,7 +535,7 @@ int main(void)
           unsigned short out_col_size;
           unsigned short No_of_output_layers;
 
-          unsigned short in_allocated_space_per_row = 32;
+          unsigned short in_allocated_space_per_row = 256;
           unsigned short out_allocated_space_per_row;
 
 
@@ -602,11 +603,27 @@ int main(void)
 				for(i = 0; i < out_row_size; i++){
 					for(j = 0; j < out_col_size; j++){
 						 //printf("Reading from address:%d\n", (ddr3_common+ output_layer_offset_one + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j));
-						printf("%d ", *(ddr3_common+ output_layer_offset + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j)) ;
+						printf("%x ", *(ddr3_common+ output_layer_offset + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j)) ;
 					}
 					  printf("\n");
 				}
 				  printf("\n");
+		    }
+		    if (layer_ID == 8){
+			    unsigned int class_idx=0, max=0, val= 0;
+			    for(j = 0; j < out_col_size; j++){
+					 //printf("Reading from address:%d\n", (ddr3_common+ output_layer_offset_one + out_layer_blk_size * k + (i * out_allocated_space_per_row) + j));
+			    	val = *(ddr3_common+ output_layer_offset + j);
+			    	if(val>max){
+			    		max = val;
+			    		class_idx = j;
+			    	}
+					//printf("%x ", *(ddr3_common+ output_layer_offset + j)) ;
+				}
+			    printf("\n####################################################################\n");
+			    printf("######################## DETECTED CLASS ##############################\n");
+			    printf("##################################################################\n");
+			    printf("Index - %d Class - %s \n",class_idx, SYSNET[class_idx]);
 		    }
 		}
 

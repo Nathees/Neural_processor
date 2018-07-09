@@ -79,6 +79,10 @@ module top(
 // Internal wires and registers
 //----------------------------------------------------------------------------------------------------------------------
 
+
+	// Interrupts
+	wire 				[31:0] 										hps_0_f2h_irq0_irq;
+
 	// FPGA to HOST SDRAM0
 	wire 				[31:0] 										sdram0_data_araddr;
 	wire 				[3:0]  										sdram0_data_arlen;
@@ -417,6 +421,9 @@ module top(
 		.hps_0_f2h_sdram0_clock_clk 								(hps_clk),
 		.hps_0_h2f_axi_clock_clk 									(hps_clk),
 
+		// Interrupts
+		.hps_0_f2h_irq0_irq											(hps_0_f2h_irq0_irq),
+
 		// SDRAM0 AXI
 		.hps_0_f2h_sdram0_data_araddr 								(axi_ddr3_araddr),
 		.hps_0_f2h_sdram0_data_arlen 								(axi_ddr3_arlen[3:0]), //[3:0]   [7:0]
@@ -570,6 +577,7 @@ module top(
 		// AXI signals
 		.clk  														(hps_clk),				
     	.reset_n  													(hps_rst_n),
+    	.read_done													(hps_0_f2h_irq0_irq[0]),
 	
 		//.M_axi_awid 												(axi_ddr3_awid), 	
 		//.M_axi_awaddr 											(axi_ddr3_awaddr),	
@@ -779,6 +787,7 @@ module top(
 
 		.clk 												(hps_clk),				
    		.reset_n 											(hps_rst_n),
+   		.write_done											(hps_0_f2h_irq0_irq[1]),
 		
 		.M_axi_awid 										(axi_ddr3_awid),
 		.M_axi_awaddr 										(axi_ddr3_awaddr),

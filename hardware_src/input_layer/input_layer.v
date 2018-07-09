@@ -44,10 +44,13 @@ module input_layer# (
 	input [0:0] input_layer_1_rdy, 
 	output[9:0] input_layer_1_id, 
 
+	output wire 												   read_done,
+
 
 	// AXI signals
 	input  wire                                                    clk,				// logic will operate in same clock as axi clock
     input  wire                                                    reset_n,
+
 	// AXI Write Address Control Signals
 	output  wire 			[C_S_AXI_ID_WIDTH-1:0] 					M_axi_awid, 	
 	output  wire 			[C_S_AXI_ADDR_WIDTH-1:0]				M_axi_awaddr,	
@@ -209,6 +212,8 @@ module input_layer# (
 	always @(posedge clk) begin : proc_r_row_position_id
 		if(~reset_n | Start) begin
 			r_row_position_id <= 0;
+		// end else if(move_to_next_rows && (r_row_position_id < input_layer_row_size) && stride2en)begin
+		// 	r_row_position_id <= r_row_position_id + 2;
 		end else if(move_to_next_rows && (r_row_position_id < input_layer_row_size))begin
 			r_row_position_id <= r_row_position_id + 1;
 		end
@@ -216,6 +221,7 @@ module input_layer# (
 
 	
 	reg r_feed_done;
+	reg r_feed_done_p1;
 	always @(posedge clk) begin : proc_r_feed_done
 		if(~reset_n | Start) begin
 			r_feed_done <= 0;
@@ -223,6 +229,16 @@ module input_layer# (
 			r_feed_done <= 1;
 		end
 	end
+
+	always @(posedge clk) begin : proc_r_feed_done_p1
+		if(~reset_n) begin
+			r_feed_done_p1 <= 0;
+		end else begin
+			r_feed_done_p1 <= r_feed_done;
+		end
+	end
+
+	assign read_done = ~r_feed_done_p1 & r_feed_done;
 
 //-----------------------------------------------------------------------------------------------
 //-------- AXI Address calculation related to input layer----------------------------------------
