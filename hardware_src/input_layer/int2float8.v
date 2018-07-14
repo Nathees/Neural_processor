@@ -16,7 +16,7 @@ module int2float8(
 	always @(posedge clk) begin : proc_r_sgn
 		if(~reset_n) begin
 			r_sgn <= 0;
-		else if(cast_) begin
+		end else if(cast_) begin
 			r_sgn <= 0;
 		end else begin
 			r_sgn <= int8_in[7:7];
@@ -46,7 +46,7 @@ module int2float8(
 	end
 
 	assign w_float9 = {r_sgn, r_exp, r_mant};
-	assign w_float9_add = w_float9[7:0] == 8'hff ?  w_float9_add : w_float9_add + 1; 
+	assign w_float9_add = (w_float9[7:0] == 8'hff) ?  w_float9 : w_float9 + 1; 
 	assign out_fl8 = w_float9_add[8:1];
 
 endmodule // int2float8
