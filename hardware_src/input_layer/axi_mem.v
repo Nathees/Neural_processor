@@ -34,6 +34,8 @@
 
 		output wire expand_en,
 
+		output wire cast_,
+
 		output wire in_layer_ddr3_data_rdy,
 
 		output wire [15:0] No_of_input_layers,
@@ -781,6 +783,7 @@
 		reg [7:0] r_layer_ID;
 		reg r_max_pool_en;
 		reg r_expand_en;
+		reg r_cast_;
 		reg r_in_layer_ddr3_data_rdy;
 		reg [15:0] r_No_of_input_layers;
 		reg [15:0] r_No_of_input_layer_rows;
@@ -844,6 +847,7 @@
 				r_in_layer_ddr3_data_rdy 	<= 0;
 				squ_repeat_en_o 			<= 0;
 				avg_en_o 					<= 0;
+				r_cast_ 					<= 0;
 			end else if(mem_wren && mem_address == 0)begin
 				r_Start 					<= S_AXI_WDATA[0:0];
 				r_layer_ID 					<= S_AXI_WDATA[15:8];
@@ -853,6 +857,7 @@
 				r_in_layer_ddr3_data_rdy 	<= S_AXI_WDATA[3:3];
 				squ_repeat_en_o 			<= S_AXI_WDATA[4:4];
 				avg_en_o 					<= S_AXI_WDATA[5:5];
+				r_cast_ 					<= S_AXI_WDATA[6:6];
 			end else begin
 				r_Start 					<= 0;
 				r_max_pool_en 				<= 0;
@@ -1159,6 +1164,7 @@
 		assign max_pool_en = r_max_pool_en;
 		assign expand_en = r_expand_en;
 		assign layer_ID = r_layer_ID;
+		assign cast_ = r_cast_;
 		assign No_of_input_layers = r_No_of_input_layers;
 		assign No_of_rows = r_No_of_input_layer_rows;
 		assign No_of_cols = r_no_of_input_layer_cols;

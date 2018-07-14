@@ -264,6 +264,7 @@ module top(
 
 	wire 															max_pool_en;
 	wire 															expand_en;
+	wire 															cast_;
 	wire 				[15:0] 										w_No_of_input_layers;
 	wire 				[15:0] 										w_No_of_rows;
 	wire 				[15:0] 										w_No_of_cols;
@@ -557,6 +558,7 @@ module top(
 		// parameters from axi_lite
 		.Start 														(w_Start),
 		.axi_address 												(w_input_layer_axi_start_addr),
+		.cast_ 														(cast_),
 
 		.no_of_input_layers  										(w_No_of_input_layers),
 		.input_layer_row_size 										(w_No_of_rows),
@@ -831,6 +833,7 @@ module top(
 
 		.max_pool_en 										(max_pool_en),
 		.expand_en 											(expand_en),
+		.cast_ 												(cast_),
 		.in_layer_ddr3_data_rdy 							(w_in_layer_ddr3_data_rdy),
 		.No_of_input_layers 								(w_No_of_input_layers),
 		.No_of_rows 										(w_No_of_rows),
