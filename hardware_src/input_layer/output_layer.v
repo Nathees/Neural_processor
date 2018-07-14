@@ -240,7 +240,7 @@ module output_layer# (
 	always @(posedge clk) begin : proc_r_fifo_layer_complete
 		if(~reset_n || Start) begin
 			r_fifo_layer_complete <= 0;
-		end else if(r_row_id_fifo >= output_layer_row_size)begin
+		end else if(r_row_id_axi >= output_layer_row_size)begin
 			r_fifo_layer_complete <= 1;
 		end else begin
 			r_fifo_layer_complete <= 0;
