@@ -12,6 +12,7 @@
 
 
 
+
 module input_layer# (
 
             parameter                           C_S_AXI_ID_WIDTH              =     3,
@@ -23,6 +24,7 @@ module input_layer# (
     ) (
 	// parameters from axi_lite
 	input 									Start,
+	input 									cast_,
 	input [C_S_AXI_ADDR_WIDTH -1 : 0] 		axi_address,
 	input 									larger_block_en,
 	input [9:0] 							allocated_space_per_row,
@@ -516,15 +518,82 @@ module input_layer# (
 	reg wea_2;
 
 	reg[63:0] r_M_axi_rdata_0;
-	reg[63:0] r_M_axi_rdata;
+	wire [63:0] w_M_axi_rdata;
 
-	always @(posedge clk) begin : proc_r_M_axi_rdata
-		if(~reset_n) begin
-			r_M_axi_rdata <= 0;
-		end else begin
-			r_M_axi_rdata <= M_axi_rdata;
-		end
-	end
+
+	int2float8 int2float8_inst_0(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[7:0]),
+		.out_fl8  	(w_M_axi_rdata[7:0])
+	);
+
+	int2float8 int2float8_inst_1(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[15:8]),
+		.out_fl8  	(w_M_axi_rdata[15:8])
+	);
+
+	int2float8 int2float8_inst_2(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[23:16]),
+		.out_fl8  	(w_M_axi_rdata[23:16])
+	);
+
+	int2float8 int2float8_inst_3(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[31:24]),
+		.out_fl8  	(w_M_axi_rdata[31:24])
+	);
+
+	int2float8 int2float8_inst_4(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[39:32]),
+		.out_fl8  	(w_M_axi_rdata[39:32])
+	);
+
+	int2float8 int2float8_inst_5(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[47:40]),
+		.out_fl8  	(w_M_axi_rdata[47:40])
+	);
+
+	int2float8 int2float8_inst_6(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[55:48]),
+		.out_fl8  	(w_M_axi_rdata[55:48])
+	);
+
+	int2float8 int2float8_inst_7(
+		.clk  		(clk),
+		.reset_n 	(reset_n),
+		.cast_ 		(cast_),
+		.int8_in 	(M_axi_rdata[63:56]),
+		.out_fl8  	(w_M_axi_rdata[63:56])
+	);
+
+
+
+	// always @(posedge clk) begin : proc_r_M_axi_rdata
+		// if(~reset_n) begin
+			// r_M_axi_rdata <= 0;
+		// end else begin
+			// r_M_axi_rdata <= M_axi_rdata;
+		// end
+	// end
 
 	always @(posedge clk) begin : proc_wea_012
 		if(~reset_n) begin
@@ -542,7 +611,7 @@ module input_layer# (
 	dual_buffer dual_buffer_inst_0
 	(
 		.clock(clk),
-		.data(r_M_axi_rdata),
+		.data(w_M_axi_rdata),
 		.rdaddress(w_addrb0),
 		.wraddress(w_blk_ram_wr_addr0),
 		.wren(wea_0),
@@ -552,7 +621,7 @@ module input_layer# (
 	dual_buffer dual_buffer_inst_1
 	(
 		.clock(clk),
-		.data(r_M_axi_rdata),
+		.data(w_M_axi_rdata),
 		.rdaddress(w_addrb1),
 		.wraddress(w_blk_ram_wr_addr1),
 		.wren(wea_1),
@@ -562,7 +631,7 @@ module input_layer# (
 	dual_buffer dual_buffer_inst_2
 	(
 		.clock(clk),
-		.data(r_M_axi_rdata),
+		.data(w_M_axi_rdata),
 		.rdaddress(w_addrb2),
 		.wraddress(w_blk_ram_wr_addr2),
 		.wren(wea_2),
