@@ -23,6 +23,10 @@ module sim_fixed2float();
 	wire 		[16:0] 	w_float_out_g;
 	wire 		[16:0] 	w_float_out_g_add;
 	reg 		[15:0] 	r_float_out_g;
+	reg 		[15:0] 	r_float_out_g_1;
+	reg 		[15:0] 	r_float_out_g_2;
+	reg 		[15:0] 	r_float_out_g_3;
+	reg 		[15:0] 	r_float_out_g_4;
 
 
 	wire 				w_error;
@@ -93,7 +97,26 @@ always #5 r_clk = ~r_clk;
 		end
 	end
 
-	assign w_error = 1'b0; //r_fixed_out_g != w_fixed_out ? 1'b1 : 1'b0;
+	always_ff @(posedge r_clk) begin : proc_r_float_out_g_1_4
+		if(~r_reset_n) begin
+			r_float_out_g_1 <= 0;
+			r_float_out_g_2 <= 0;
+			r_float_out_g_3 <= 0;
+			r_float_out_g_4 <= 0;
+		end else begin
+			r_float_out_g_1 <= r_float_out_g;
+			r_float_out_g_2 <= r_float_out_g_1;
+			r_float_out_g_3 <= r_float_out_g_2;
+			r_float_out_g_4 <= r_float_out_g_3;
+		end
+	end
+
+	
+	
+	
+	
+
+	assign w_error = r_float_out_g_4 != w_float_out ? 1'b1 : 1'b0;
 //----------------------------------------------------
 //-----------instantiating DUT------------------------
 //----------------------------------------------------
