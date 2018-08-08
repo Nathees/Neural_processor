@@ -18,8 +18,10 @@ module sim_fixed2float();
 
 	reg 				r_sign_g;
 	reg 		[4:0]	r_exp_g;
-	reg 		[9:0] 	r_mant_g;
+	reg 		[10:0] 	r_mant_g;
 
+	wire 		[16:0] 	w_float_out_g;
+	wire 		[16:0] 	w_float_out_g_add;
 	reg 		[15:0] 	r_float_out_g;
 
 
@@ -74,17 +76,20 @@ always #5 r_clk = ~r_clk;
 	  	for(int i = 41; i >= 10; i--) begin
 	  	  	if(w_magnitude_fixed[i]) begin
 	  	  		r_exp_g <= i - 10;
-	  	  		r_mant_g <= (w_magnitude_fixed >> (i - 10));
+	  	  		r_mant_g <= i > 11 ? (w_magnitude_fixed >> (i - 11)) : (w_magnitude_fixed >> (i - 10));
 	  	  		break;
 	  	  	end // if(w_magnitude_fixed[i])
 	  	end
 	end
 
+
+	assign w_float_out_g = {r_sign_g, r_exp_g, r_mant_g};
+	assign w_float_out_g_add = w_float_out_g + 1;
 	always_ff @(posedge r_clk) begin : proc_r_float_out_g
 		if(~r_reset_n) begin
 			r_float_out_g <= 0;
 		end else begin
-			r_float_out_g <= {r_sign_g, r_exp_g, r_mant_g};
+			r_float_out_g <= w_float_out_g_add[16:1];
 		end
 	end
 
