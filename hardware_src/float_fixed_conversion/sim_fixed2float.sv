@@ -8,12 +8,13 @@ module sim_fixed2float();
 
 	reg 				r_clk;
 	reg 				r_reset_n;
-	reg 		[43:0]	r_fixed_in;
+	reg 		[42:0]	r_fixed_in;
 	wire 		[15:0]	w_float_out;
 
 
 	wire 				w_sign_fixed;
-	wire 		[42:0] 	w_magnitude_fixed;
+	wire 		[41:0] 	w_neg_sgn_adjusted;
+	wire 		[41:0] 	w_magnitude_fixed;
 
 	reg 				r_sign_g;
 	reg 		[4:0]	r_exp_g;
@@ -53,7 +54,7 @@ always #5 r_clk = ~r_clk;
 		end else begin
 			r_fixed_in[15:0] <= $urandom_range(65536);
 			r_fixed_in[31:16] <= $urandom_range(65536);
-			r_fixed_in[43:32] <= $urandom_range(4096);
+			r_fixed_in[42:32] <= $urandom_range(2048);
 		end
 	end
 
@@ -61,18 +62,19 @@ always #5 r_clk = ~r_clk;
 //------------- Golden Model--------------------------
 //----------------------------------------------------
 	
-	assign w_sign_fixed = r_fixed_in[43:43];
-	assign w_magnitude_fixed = w_sign_fixed ? ~(r_fixed_in[42:0] - 1) : r_fixed_in[42:0];
+	assign w_sign_fixed = r_fixed_in[42:42];
+	assign w_neg_sgn_adjusted = ~(r_fixed_in[42:0] - 1) ;
+	assign w_magnitude_fixed = w_sign_fixed ? w_neg_sgn_adjusted : r_fixed_in[41:0];
 	assign w_sign_g = w_sign_fixed;
 
-	always_ff(posedge clk) begin
+	always_ff @(posedge r_clk) begin : proc_r_float_cal
 		r_sign_g <= w_sign_g;
 		r_exp_g <= 0;
 		r_mant_g <= 0;
-	  	for(int i = 42; i >= 0; i--) begin
+	  	for(int i = 41; i >= 10; i--) begin
 	  	  	if(w_magnitude_fixed[i]) begin
-	  	  		r_exp_g <= i - 11;
-	  	  		r_mant_g <= w_magnitude_fixed[i-1:i-10];
+	  	  		r_exp_g <= i - 10;
+	  	  		r_mant_g <= (w_magnitude_fixed >> (i - 10));
 	  	  		break;
 	  	  	end // if(w_magnitude_fixed[i])
 	  	end
