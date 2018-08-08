@@ -12,6 +12,18 @@ module sim_float2fixed();
 	wire 		[43:0]	w_fixed_out;
 
 
+	wire 				w_sign_g;
+	wire 		[4:0]	w_exp_g;
+	wire 		[9:0] 	w_mant_g;
+
+	wire 		[42:0] 	w_fixed_mag_g;
+	wire 		[43:0] 	w_fixed_twos_g;
+	wire 		[43:0] 	w_fixed_out_g;
+	reg 		[43:0] 	r_fixed_out_g;
+
+
+	wire 				w_error;
+
 //----------------------------------------------------
 //---------- Initialisation ------------------------
 //----------------------------------------------------
@@ -39,11 +51,31 @@ always #5 r_clk = ~r_clk;
 		if(~r_reset_n) begin
 			r_float_in <= 0;
 		end else begin
-			r_float_in <= $urandom_range(4096);
+			r_float_in <= $urandom_range(65536);
 		end
 	end
 
+//----------------------------------------------------
+//------------- Golden Model--------------------------
+//----------------------------------------------------
+	
+	assign w_sign_g = r_float_in[15:15];
+	assign w_exp_g = r_float_in[14:10];
+	assign w_mant_g = r_float_in[9:0];
 
+	assign w_fixed_mag_g = ({1'b1, w_mant_g} << w_exp_g);
+	assign w_fixed_twos_g = ~w_fixed_mag_g + 1;
+	assign w_fixed_out_g = w_sign_g ? w_fixed_twos_g : w_fixed_mag_g;
+
+	always_ff @(posedge r_clk) begin : proc_r_fixed_out_g
+		if(~r_reset_n) begin
+			r_fixed_out_g <= 0;
+		end else begin
+			r_fixed_out_g <= w_fixed_out_g;
+		end
+	end
+
+	assign w_error = r_fixed_out_g != w_fixed_out ? 1'b1 : 1'b0;
 //----------------------------------------------------
 //-----------instantiating DUT------------------------
 //----------------------------------------------------
