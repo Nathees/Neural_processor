@@ -189,7 +189,7 @@ module sim_float_add();
 		);
 		
 	assign w_fixed_result_inmt = w_fixed_a + w_fixed_b;
-	assign w_fixed_result = (w_fixed_a[42] & w_fixed_b[42]) &  ~w_fixed_result_inmt[42]? {1'b1, 42'h00000000001} : ((~w_fixed_a[42] & ~w_fixed_b[42]) &  w_fixed_result_inmt[42]) ? {1'b0, 42'h3ffffffffff} : w_fixed_result_inmt[42:0];
+	assign w_fixed_result = (w_fixed_a[42] & w_fixed_b[42]) &  ~w_fixed_result_inmt[42]? {1'b1, 42'h00000000000} : ((~w_fixed_a[42] & ~w_fixed_b[42]) &  w_fixed_result_inmt[42]) ? {1'b0, 42'h3ffffffffff} : w_fixed_result_inmt[42:0];
 
 	fixed2float fixed2float_inst(
 			.clk(clk),

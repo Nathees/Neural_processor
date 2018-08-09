@@ -20,7 +20,8 @@ module fixed2float (
 
 	wire 							w_sign;
 	wire 		[F_WIDTH-1:0]		w_inverted;
-	wire 		[F_WIDTH-2:0]		w_magnitude;
+	wire 		[F_WIDTH-1:0]		w_magnitude;
+	wire 		[F_WIDTH-1:0]		w_magnitude_negetive_max;
 
 	// level 0
 	reg 		[F_WIDTH-2:0]		r_magnitude_0;
@@ -74,6 +75,7 @@ module fixed2float (
 	assign w_sign = fixed_in[F_WIDTH-1:F_WIDTH-1];
 	//assign w_inverted = ~fixed_in[F_WIDTH-1:0];
 	assign w_magnitude = ~(fixed_in[F_WIDTH-1:0] - 1);
+	assign w_magnitude_negetive_max = w_magnitude[42] ? 42'h3ffffffffff : w_magnitude;
 
 	// registering sign and manitude
 
@@ -82,7 +84,7 @@ module fixed2float (
 			r_magnitude_0 <= 0;
 			r_sign_0 <= 0;
 		end else begin
-			r_magnitude_0 <= w_sign ? w_magnitude[F_WIDTH-2:0] : fixed_in[F_WIDTH-2:0];
+			r_magnitude_0 <= w_sign ? w_magnitude_negetive_max[F_WIDTH-2:0] : fixed_in[F_WIDTH-2:0];
 			r_sign_0 <= w_sign;
 		end
 	end
