@@ -238,7 +238,7 @@ module fixed2float (
 // concating and output roundoff
 	assign w_float_17 = {r_sign_4, r_rxp_4, r_mant_4};
 	assign w_float_17_add  = w_float_17 + 1;
-	assign w_float_16 = w_float_17_add[16:1];
+	assign w_float_16 = w_float_17[16:1] == 16'hffff ? w_float_17[16:1] : w_float_17_add[16:1];
 
 	always @(posedge clk) begin : proc_r_float_16
 		if(~reset_n) begin
