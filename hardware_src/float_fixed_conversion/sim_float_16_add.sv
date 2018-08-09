@@ -81,13 +81,13 @@ module sim_float_add();
     end
 
     // bits to real
-    assign real_a_bits[63:63] = fp_a[10:0] == 0 ? 0: fp_a[15:15];
-    assign real_a_bits[62:52] = fp_a[10:0] == 0 ? 0: fp_a[14:10] + 1023 - 15;
-    assign real_a_bits[51:0] =  fp_a[10:0] == 0 ? 0: {fp_a[9:0] , 42'b0};
+    assign real_a_bits[63:63] = fp_a[14:0] == 0 ? 0: fp_a[15:15];
+    assign real_a_bits[62:52] = fp_a[14:0] == 0 ? 0: fp_a[14:10] + 1023 - 15;
+    assign real_a_bits[51:0] =  fp_a[14:0] == 0 ? 0: {fp_a[9:0] , 42'b0};
 
-    assign real_b_bits[63:63] = fp_b[10:0] == 0? 0: fp_b[15:15];
-    assign real_b_bits[62:52] = fp_b[10:0] == 0? 0: fp_b[14:10] + 1023 - 15;
-    assign real_b_bits[51:0] =  fp_b[10:0] == 0? 0: {fp_b[9:0] , 42'b0};
+    assign real_b_bits[63:63] = fp_b[14:0] == 0? 0: fp_b[15:15];
+    assign real_b_bits[62:52] = fp_b[14:0] == 0? 0: fp_b[14:10] + 1023 - 15;
+    assign real_b_bits[51:0] =  fp_b[14:0] == 0? 0: {fp_b[9:0] , 42'b0};
 
     assign real_x_bits[63:63] = fp_x[15:15];
     assign real_x_bits[62:52] = fp_x[14:10] + 1023 - 15;
@@ -151,7 +151,7 @@ module sim_float_add();
     assign fp_x_expected = fp_x_expected_inmt[16:1] == 16'hffff ? fp_x_expected_inmt[16:1] : fp_x_expected_inmt_1[16:1];
 
     // error bit
-    wire[15:0] diff = (fP_expected_p5 >= fp_x)  ? fP_expected_p5 - fp_x :  fp_x - fP_expected_p5;
+    wire[14:0] diff = (fP_expected_p5[14:0] >= fp_x[14:0])  ? fP_expected_p5[14:0] - fp_x[14:0] :  fp_x[14:0] - fP_expected_p5[14:0];
     wire error = (diff == 0) ? 0 : 1;
 
     reg r_error;
