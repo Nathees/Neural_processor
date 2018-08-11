@@ -71,7 +71,7 @@ module mult_16(
 		.clock(clk_i),
 		.dataa(w_mult_a),
 		.datab(w_mult_b),
-		.result(w_mult_ab)
+		.result(w_mult_result)
 		);
 	assign w_mult_ab = w_mult_result[21:9];
 
@@ -209,7 +209,7 @@ module mult_16(
 		if(~rst_n_i || r_multiply_by_zero_2 || (r_zero_result_flag & ~(r_incr_exp_flag & w_mult_ab[12:12]))) begin
 			r_mant_x <= 0;
 		end else if((w_mult_ab[12:12] && r_exp_eq_31) || r_exp_gt31) begin
-			r_mant_x <= 7'h7f;
+			r_mant_x <= 11'h7ff;
 		end else if(w_mult_ab[12:12]) begin
 			r_mant_x <= w_mult_ab[11:1];
 		end else begin

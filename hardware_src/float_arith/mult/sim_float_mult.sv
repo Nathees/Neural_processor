@@ -1,5 +1,5 @@
 //`include "mult_12.v"
-`include "../multiplier/multiplier_7x7.v"
+`include "../multiplier/multiplier_11x11.v"
 
 module sim_float_mult();
 
