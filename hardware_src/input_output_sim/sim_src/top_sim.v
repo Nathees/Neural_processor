@@ -194,9 +194,9 @@ module top_sim();
 			.input_layer_row_size(13),
 			.input_layer_col_size(13),
 			.in_layer_ddr3_data_rdy(1'b1),
-			.input_layer_1_data(data_o),
-			.input_layer_1_valid(valid_o),
-			.input_layer_1_rdy(w_input_layer_1_rdy), 
+			.input_layer_data_3x3(data_o),
+			.input_layer_data_valid(valid_o),
+			.input_layer_data_rdy(w_input_layer_1_rdy), 
 			.input_layer_1_id(), 
 
 
