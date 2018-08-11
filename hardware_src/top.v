@@ -79,6 +79,10 @@ module top(
 // Internal wires and registers
 //----------------------------------------------------------------------------------------------------------------------
 
+
+	// Interrupts
+	wire 				[31:0] 										hps_0_f2h_irq0_irq;
+
 	// FPGA to HOST SDRAM0
 	wire 				[31:0] 										sdram0_data_araddr;
 	wire 				[3:0]  										sdram0_data_arlen;
@@ -260,6 +264,7 @@ module top(
 
 	wire 															max_pool_en;
 	wire 															expand_en;
+	wire 															cast_;
 	wire 				[15:0] 										w_No_of_input_layers;
 	wire 				[15:0] 										w_No_of_rows;
 	wire 				[15:0] 										w_No_of_cols;
@@ -417,6 +422,9 @@ module top(
 		.hps_0_f2h_sdram0_clock_clk 								(hps_clk),
 		.hps_0_h2f_axi_clock_clk 									(hps_clk),
 
+		// Interrupts
+		.hps_0_f2h_irq0_irq											(hps_0_f2h_irq0_irq),
+
 		// SDRAM0 AXI
 		.hps_0_f2h_sdram0_data_araddr 								(axi_ddr3_araddr),
 		.hps_0_f2h_sdram0_data_arlen 								(axi_ddr3_arlen[3:0]), //[3:0]   [7:0]
@@ -550,6 +558,7 @@ module top(
 		// parameters from axi_lite
 		.Start 														(w_Start),
 		.axi_address 												(w_input_layer_axi_start_addr),
+		.cast_ 														(cast_),
 
 		.no_of_input_layers  										(w_No_of_input_layers),
 		.input_layer_row_size 										(w_No_of_rows),
@@ -570,6 +579,7 @@ module top(
 		// AXI signals
 		.clk  														(hps_clk),				
     	.reset_n  													(hps_rst_n),
+    	.read_done													(hps_0_f2h_irq0_irq[0]),
 	
 		//.M_axi_awid 												(axi_ddr3_awid), 	
 		//.M_axi_awaddr 											(axi_ddr3_awaddr),	
@@ -779,6 +789,7 @@ module top(
 
 		.clk 												(hps_clk),				
    		.reset_n 											(hps_rst_n),
+   		.write_done											(hps_0_f2h_irq0_irq[1]),
 		
 		.M_axi_awid 										(axi_ddr3_awid),
 		.M_axi_awaddr 										(axi_ddr3_awaddr),
@@ -822,6 +833,7 @@ module top(
 
 		.max_pool_en 										(max_pool_en),
 		.expand_en 											(expand_en),
+		.cast_ 												(cast_),
 		.in_layer_ddr3_data_rdy 							(w_in_layer_ddr3_data_rdy),
 		.No_of_input_layers 								(w_No_of_input_layers),
 		.No_of_rows 										(w_No_of_rows),

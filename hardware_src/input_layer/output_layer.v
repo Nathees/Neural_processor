@@ -27,6 +27,8 @@ module output_layer# (
 	input [9:0] out_fifo_1_dcount,
 	output  out_fifo_1_rd_en, 
 
+	output wire 												   write_done,
+
 
 	// AXI signals
 	input  wire                                                    clk,				// logic will operate in same clock as axi clock
@@ -238,7 +240,7 @@ module output_layer# (
 	always @(posedge clk) begin : proc_r_fifo_layer_complete
 		if(~reset_n || Start) begin
 			r_fifo_layer_complete <= 0;
-		end else if(r_row_id_fifo >= output_layer_row_size)begin
+		end else if(r_row_id_axi >= output_layer_row_size)begin
 			r_fifo_layer_complete <= 1;
 		end else begin
 			r_fifo_layer_complete <= 0;
@@ -246,9 +248,16 @@ module output_layer# (
 	end
 
 	
+	reg r_fifo_layer_complete_p1;
+	always @(posedge clk) begin : proc_r_fifo_layer_complete_p1
+		if(~reset_n) begin
+			r_fifo_layer_complete_p1 <= 0;
+		end else begin
+			r_fifo_layer_complete_p1 <= r_fifo_layer_complete;
+		end
+	end
 
-
-
+	assign write_done = ~r_fifo_layer_complete_p1 & r_fifo_layer_complete;
 
 // FSM for writing fifo contents to blk ram
 	reg [3:0] r_FSM_row_former;
@@ -660,6 +669,8 @@ module output_layer# (
 			r_clock_count <= r_clock_count + 1;
 		end
 	end
+
+
 
 	
 
