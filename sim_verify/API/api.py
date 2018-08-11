@@ -9,11 +9,11 @@
 ##layer 8 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 64 	exp_1x1_en = 1 		max_en = 0 		avg_en = 0
 ##layer 9 :- 	dim = 13 		depth = 64 		exp_kernal = 256 	squ_kernal = 100 	exp_1x1_en = 1 		max_en = 0 		avg_en = 1
 
-##layer 9 :- 	
-dim = 56 		
+##laye 9 :- 	
+dim = 27 		
 depth = 16 		
 exp_kernal = 64 	
-squ_kernal = 16 	
+squ_kernal = 32 	
 exp_1x1_en = 1 		
 max_en = 0 		
 avg_en = 0
@@ -126,54 +126,68 @@ if valid_config :
 	print('squ_3x3_ker_depth_i = ', exp_kernal) 
 	print('squ_layer_dimension_i = ', squ_dim - 1)  
 
+	print('\n\n\n')
+	print('exp_1x1_en_i = ',exp_1x1_en) 
+	print('max_en_i = ',max_en)
+	print('one_exp_ker_addr_limit_i = ', exp_kernal//8)
+	print('exp_ker_depth_i = ', depth-1)
+	print('layer_dimension_i = ', dim-1)
+	print('tot_exp1_ker_addr_limit_i = ', ((exp_kernal * depth) // 8) - 1)
+	print('one_exp_layer_addr_limit_i = ', ((dim * exp_kernal) // 8) - 1)  
+	print('no_of_exp_kernals_i = ', ((2 * exp_kernal) // 8) - 1) 
+	print('exp_123_addr_space_i = ', (exp_kernal // 8 * 3) - 1)  	
+	print('exp_12_addr_space_i = ', exp_kernal // 8 * 2) 
+	print('exp_1_addr_space_i = ', (exp_kernal // 8 * 1) - 1)  
+	print('exp_tot_addr_space_i = ', (dim * exp_kernal // 8) - 2)
+	print('max_tot_addr_space_i = ', (max_dim * exp_kernal // 8) - 2)   
 
-	print('\n\nAddress Space')
+	# print('\n\nAddress Space')
 
-	reg_axi_address = 144;
-	fire_config = (dim - 1) << 16;
-	fire_config = fire_config + ((depth - 1) << 8);
-	fire_config = fire_config + (exp_kernal // 4);
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = 144;
+	# fire_config = (dim - 1) << 16;
+	# fire_config = fire_config + ((depth - 1) << 8);
+	# fire_config = fire_config + (exp_kernal // 4);
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;
-	fire_config = (((dim * exp_kernal) // 4 ) - 1) << 16;
-	fire_config = fire_config + (((exp_kernal * depth) // 4) - 1);
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;
+	# fire_config = (((dim * exp_kernal) // 4 ) - 1) << 16;
+	# fire_config = fire_config + (((exp_kernal * depth) // 4) - 1);
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;
-	fire_config = ((exp_kernal // 4 * 1) - 1) << 24;
-	fire_config = fire_config + ((exp_kernal // 4 * 2) << 16);
-	fire_config = fire_config + (((exp_kernal // 4 * 3) - 1) << 8);
-	fire_config = fire_config + ((2 * exp_kernal // 8) - 1);
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;
+	# fire_config = ((exp_kernal // 4 * 1) - 1) << 24;
+	# fire_config = fire_config + ((exp_kernal // 4 * 2) << 16);
+	# fire_config = fire_config + (((exp_kernal // 4 * 3) - 1) << 8);
+	# fire_config = fire_config + ((2 * exp_kernal // 8) - 1);
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;
-	fire_config = ((max_dim * exp_kernal // 4) - 2) << 16;
-	fire_config = fire_config + ((dim * exp_kernal // 4) - 2);
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;
+	# fire_config = ((max_dim * exp_kernal // 4) - 2) << 16;
+	# fire_config = fire_config + ((dim * exp_kernal // 4) - 2);
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;	
-	fire_config = (exp_kernal // 8) << 16;
-	fire_config = fire_config + ((squ_kernal * 2 * exp_kernal // 8) - 1);
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;	
+	# fire_config = (exp_kernal // 8) << 16;
+	# fire_config = fire_config + ((squ_kernal * 2 * exp_kernal // 8) - 1);
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;
-	fire_config = (max_squ_kernel - 1) << 16;
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;
+	# fire_config = (max_squ_kernel - 1) << 16;
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;
-	fire_config = (squ_kernal - 1) << 16;
-	fire_config = fire_config + ((squ_dim * exp_kernal // 8) - 1);
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;
+	# fire_config = (squ_kernal - 1) << 16;
+	# fire_config = fire_config + ((squ_dim * exp_kernal // 8) - 1);
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
 
-	reg_axi_address = reg_axi_address + 4;
-	fire_config = 0;
-	fire_config = (squ_dim - 1) << 16;
-	fire_config = fire_config + exp_kernal;
-	print('Addr : ',reg_axi_address,' = ',hex(fire_config))
+	# reg_axi_address = reg_axi_address + 4;
+	# fire_config = 0;
+	# fire_config = (squ_dim - 1) << 16;
+	# fire_config = fire_config + exp_kernal;
+	# print('Addr : ',reg_axi_address,' = ',hex(fire_config))
