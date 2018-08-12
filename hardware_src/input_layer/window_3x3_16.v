@@ -45,24 +45,24 @@
 //	
 //endmodule
 
-module reg_fifo(
+module reg_fifo_16(
 
 	input clk,
 	input reset_n,
 	input Start, 
 	input one_row_complete,
 	input stride2en,
-	input [63:0] data_in,
+	input [128:0] data_in,
 	input [0:0] push,
 	input [0:0] pop,
-	output[23:0] data_o,
+	output[47:0] data_o,
 	output[3:0] count
 
 	);
 
-	reg [119:0] reg_file;
-	reg [119:0] w_reg_file;
-	reg [23:0] w_data_o;
+	reg [239:0] reg_file;
+	reg [239:0] w_reg_file;
+	reg [47:0] w_data_o;
 
 	reg[3:0] r_ptr;
 	reg[3:0] w_ptr;
@@ -123,21 +123,21 @@ module reg_fifo(
 
 	always @(*) begin : proc_write
 		case(w_ptr)
-			4'b0000: w_reg_file <= {reg_file[119:64], data_in[63:0]};
-			4'b0001: w_reg_file <= {reg_file[119:72], data_in[63:0], reg_file[7:0]};
-			4'b0010: w_reg_file <= {reg_file[119:80], data_in[63:0], reg_file[15:0]};
-			4'b0011: w_reg_file <= {reg_file[119:88], data_in[63:0], reg_file[23:0]};
-			4'b0100: w_reg_file <= {reg_file[119:96], data_in[63:0], reg_file[31:0]};
-			4'b0101: w_reg_file <= {reg_file[119:104],data_in[63:0], reg_file[39:0]};
-			4'b0110: w_reg_file <= {reg_file[119:112],data_in[63:0], reg_file[47:0]};
-			4'b0111: w_reg_file <= {data_in[63:0], reg_file[55:0]};
-			4'b1000: w_reg_file <= {data_in[55:0], reg_file[63:8], data_in[63:56]};
-			4'b1001: w_reg_file <= {data_in[47:0], reg_file[71:16], data_in[63:48]};
-			4'b1010: w_reg_file <= {data_in[39:0], reg_file[79:24], data_in[63:40]};
-			4'b1011: w_reg_file <= {data_in[31:0], reg_file[87:32], data_in[63:32]};
-			4'b1100: w_reg_file <= {data_in[23:0], reg_file[95:40], data_in[63:24]};
-			4'b1101: w_reg_file <= {data_in[15:0], reg_file[103:48], data_in[63:16]};
-			4'b1110: w_reg_file <= {data_in[7:0], reg_file[111:56], data_in[63:8]};
+			4'b0000: w_reg_file <= {reg_file[239:128], data_in[127:0]};
+			4'b0001: w_reg_file <= {reg_file[239:144], data_in[127:0], reg_file[15:0]};
+			4'b0010: w_reg_file <= {reg_file[239:160], data_in[127:0], reg_file[31:0]};
+			4'b0011: w_reg_file <= {reg_file[239:176], data_in[127:0], reg_file[47:0]};
+			4'b0100: w_reg_file <= {reg_file[239:192], data_in[127:0], reg_file[63:0]};
+			4'b0101: w_reg_file <= {reg_file[239:208], data_in[127:0], reg_file[79:0]};
+			4'b0110: w_reg_file <= {reg_file[239:224], data_in[127:0], reg_file[95:0]};
+			4'b0111: w_reg_file <= {data_in[127:0], reg_file[111:0]};
+			4'b1000: w_reg_file <= {data_in[111:0], reg_file[127:16], data_in[127:112]};
+			4'b1001: w_reg_file <= {data_in[95:0], reg_file[143:32],  data_in[127:96]};
+			4'b1010: w_reg_file <= {data_in[79:0], reg_file[159:48],  data_in[127:80]};
+			4'b1011: w_reg_file <= {data_in[63:0], reg_file[174:64],  data_in[127:64]};
+			4'b1100: w_reg_file <= {data_in[47:0], reg_file[191:80],  data_in[127:48]};
+			4'b1101: w_reg_file <= {data_in[31:0], reg_file[207:96],  data_in[127:32]};
+			4'b1110: w_reg_file <= {data_in[15:0], reg_file[123:112], data_in[127:16]};
 			default : w_reg_file <= reg_file;
 		endcase
 	end
@@ -145,22 +145,22 @@ module reg_fifo(
 
 	always @(*) begin : proc_read
 		case (r_ptr)
-			4'b0000: w_data_o <= {reg_file[23:0]};
-			4'b0001: w_data_o <= {reg_file[31:8]};
-			4'b0010: w_data_o <= {reg_file[39:16]};
-			4'b0011: w_data_o <= {reg_file[47:24]};
-			4'b0100: w_data_o <= {reg_file[55:32]};
-			4'b0101: w_data_o <= {reg_file[63:40]};
-			4'b0110: w_data_o <= {reg_file[71:48]};
-			4'b0111: w_data_o <= {reg_file[79:56]};
-			4'b1000: w_data_o <= {reg_file[87:64]};
-			4'b1001: w_data_o <= {reg_file[95:72]};
-			4'b1010: w_data_o <= {reg_file[103:80]};
-			4'b1011: w_data_o <= {reg_file[111:88]};
-			4'b1100: w_data_o <= {reg_file[119:96]};
-			4'b1101: w_data_o <= {reg_file[7:0], reg_file[119:104]};
-			4'b1110: w_data_o <= {reg_file[15:0], reg_file[119:112]};
-			default : w_data_o <= {reg_file[23:0]};
+			4'b0000: w_data_o <= {reg_file[47:0]};
+			4'b0001: w_data_o <= {reg_file[63:16]};
+			4'b0010: w_data_o <= {reg_file[79:32]};
+			4'b0011: w_data_o <= {reg_file[95:48]};
+			4'b0100: w_data_o <= {reg_file[111:64]};
+			4'b0101: w_data_o <= {reg_file[127:80]};
+			4'b0110: w_data_o <= {reg_file[143:96]};
+			4'b0111: w_data_o <= {reg_file[159:112]};
+			4'b1000: w_data_o <= {reg_file[175:128]};
+			4'b1001: w_data_o <= {reg_file[191:144]};
+			4'b1010: w_data_o <= {reg_file[207:160]};
+			4'b1011: w_data_o <= {reg_file[223:176]};
+			4'b1100: w_data_o <= {reg_file[239:192]};
+			4'b1101: w_data_o <= {reg_file[15:0], reg_file[239:208]};
+			4'b1110: w_data_o <= {reg_file[31:0], reg_file[239:224]};
+			default : w_data_o <= {reg_file[47:0]};
 		endcase
 	end
 
