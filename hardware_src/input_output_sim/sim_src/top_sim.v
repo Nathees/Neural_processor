@@ -173,26 +173,26 @@ module top_sim();
 
 
 
-	input_layer  #(
+	input_layer_16  #(
 
         .C_S_AXI_ID_WIDTH(3),
         .C_S_AXI_ADDR_WIDTH(32),
-        .C_S_AXI_DATA_WIDTH(64),
+        .C_S_AXI_DATA_WIDTH(128),
         .C_S_AXI_BURST_LEN(8),
-        .STREAM_DATA_WIDTH(72)
+        .STREAM_DATA_WIDTH(144)
              
     ) input_layer_inst (
 	// parameters from axi_lite
 	        .Start(Start),
-			.axi_address(32'hFc0),
+			.axi_address(32'h1Fc0),
 			.larger_block_en(0),
 			.allocated_space_per_row(64),
 			.stride2en(0),
 			.burst_per_row(1),
-			.read_burst_len(7),
+			.read_burst_len(3),
 			.no_of_input_layers(5),
-			.input_layer_row_size(56),
-			.input_layer_col_size(56),
+			.input_layer_row_size(28),
+			.input_layer_col_size(28),
 			.in_layer_ddr3_data_rdy(1'b1),
 			.input_layer_data_3x3(data_o),
 			.input_layer_data_valid(valid_o),
@@ -269,9 +269,9 @@ module top_sim();
     end
 
 
-    wire [15:0] win_0_0 = data_o[143:128];
+    wire [15:0] win_2_0 = data_o[143:128];
     wire [15:0] win_1_0 = data_o[127:112];
-    wire [15:0] win_2_0 = data_o[111:96];
+    wire [15:0] win_0_0 = data_o[111:96];
 
     wire [15:0] win_2_1 = data_o[95:80];
     wire [15:0] win_1_1 = data_o[79:64];
