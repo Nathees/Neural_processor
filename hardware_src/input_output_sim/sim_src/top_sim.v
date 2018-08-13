@@ -2,13 +2,13 @@ module top_sim();
 
 
 		localparam C_S_AXI_ID_WIDTH = 1;
-		localparam C_S_AXI_DATA_WIDTH = 64;
+		localparam C_S_AXI_DATA_WIDTH = 128;
 		localparam C_S_AXI_ADDR_WIDTH = 32;
 		localparam C_S_AXI_AWUSER_WIDTH = 0;
 		localparam C_S_AXI_WUSER_WIDTH = 0;
 		localparam C_S_AXI_RUSER_WIDTH = 0;
 		localparam C_S_AXI_BUSER_WIDTH = 0;
-		localparam STREAM_DATA_WIDTH = 72;
+		localparam STREAM_DATA_WIDTH = 144;
 		localparam C_S_AXI_BURST_LEN = 8;
 
 
@@ -17,7 +17,7 @@ module top_sim();
 		
 		reg Start;
 
-		wire [71:0] data_o;
+		wire [STREAM_DATA_WIDTH-1:0] data_o;
 		wire  		valid_o;
 		wire w_input_layer_1_rdy;
 
@@ -184,15 +184,15 @@ module top_sim();
     ) input_layer_inst (
 	// parameters from axi_lite
 	        .Start(Start),
-			.axi_address(32'hFF0),
+			.axi_address(32'hFc0),
 			.larger_block_en(0),
-			.allocated_space_per_row(16),
+			.allocated_space_per_row(64),
 			.stride2en(0),
 			.burst_per_row(1),
-			.read_burst_len(1),
-			.no_of_input_layers(16),
-			.input_layer_row_size(13),
-			.input_layer_col_size(13),
+			.read_burst_len(7),
+			.no_of_input_layers(5),
+			.input_layer_row_size(56),
+			.input_layer_col_size(56),
 			.in_layer_ddr3_data_rdy(1'b1),
 			.input_layer_data_3x3(data_o),
 			.input_layer_data_valid(valid_o),
@@ -254,7 +254,7 @@ module top_sim();
 
     integer f;
     initial begin
-    	f = $fopen("/home/vasan/altera/AP85/output_files/output.txt","w");
+    	f = $fopen("/home/vasan/AP85/temp/output.txt","w");
         Start = 0;
     	clk = 0;
     	reset_n = 0;
@@ -269,17 +269,17 @@ module top_sim();
     end
 
 
-    wire [7:0] win_0_0 = data_o[55:48];
-    wire [7:0] win_1_0 = data_o[63:56];
-    wire [7:0] win_2_0 = data_o[71:64];
+    wire [15:0] win_0_0 = data_o[143:128];
+    wire [15:0] win_1_0 = data_o[127:112];
+    wire [15:0] win_2_0 = data_o[111:96];
 
-    wire [7:0] win_2_1 = data_o[47:40];
-    wire [7:0] win_1_1 = data_o[39:32];
-    wire [7:0] win_0_1 = data_o[31:24];
+    wire [15:0] win_2_1 = data_o[95:80];
+    wire [15:0] win_1_1 = data_o[79:64];
+    wire [15:0] win_0_1 = data_o[63:48];
 
-    wire [7:0] win_2_2 = data_o[23:16];
-    wire [7:0] win_1_2 = data_o[15:8];
-    wire [7:0] win_0_2 = data_o[7:0];
+    wire [15:0] win_2_2 = data_o[47:32];
+    wire [15:0] win_1_2 = data_o[31:16];
+    wire [15:0] win_0_2 = data_o[15:0];
 
     reg[3:0] r_rand_number;
     reg r_ready;
@@ -289,7 +289,7 @@ module top_sim();
     	if(~reset_n) begin
     		r_rand_number <= 0;
     	end else begin
-    		r_rand_number <= $random%8;
+    		r_rand_number <= 1;
     	end
     end
 
