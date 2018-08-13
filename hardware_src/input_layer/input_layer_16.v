@@ -180,7 +180,7 @@ module input_layer_16# (
 
 
 //---------------------------------------------------------------------------------------------
-	// state machine for iteraating along
+	// state machine for iterating along
 	// input layers
 //---------------------------------------------------------------------------------------------
 	// provide 3x3 window on each clockcycle moving 
@@ -344,7 +344,7 @@ module input_layer_16# (
 			end else if(r_fetch_rows_FSM == 4'b0000 && r_fetch_rows) begin
 				r_row_current_address_counter <= r_row_base_address_counter;
 			end else if(M_axi_rvalid & M_axi_rready) begin
-				r_row_current_address_counter <= r_row_current_address_counter + 8;
+				r_row_current_address_counter <= r_row_current_address_counter + 16;
 			end
 		end
 
@@ -442,9 +442,9 @@ module input_layer_16# (
 //		.q);
 
 
-	wire [63:0] dual_buffer_inst_doutb0;
-	wire [63:0] dual_buffer_inst_doutb1;
-	wire [63:0] dual_buffer_inst_doutb2;
+	wire [C_S_AXI_DATA_WIDTH-1:0] dual_buffer_inst_doutb0;
+	wire [C_S_AXI_DATA_WIDTH-1:0] dual_buffer_inst_doutb1;
+	wire [C_S_AXI_DATA_WIDTH-1:0] dual_buffer_inst_doutb2;
 
 	reg [7:0] addrb0;
 	reg [7:0] addrb1;
@@ -667,7 +667,7 @@ module input_layer_16# (
 
 	// register fifo instances
 	// 8 byte push and 3 byte read and one byte shift per pop
-	reg_fifo reg_fifo_inst0(
+	reg_fifo_16 reg_fifo_inst0(
 		.clk(clk),
 		.reset_n(reset_n),
 		.Start(Start),
@@ -680,7 +680,7 @@ module input_layer_16# (
 		.count(fifo_count_0)
 	);
 
-	reg_fifo reg_fifo_inst1(
+	reg_fifo_16 reg_fifo_inst1(
 		.clk(clk),
 		.reset_n(reset_n),
 		.Start(Start),
@@ -693,7 +693,7 @@ module input_layer_16# (
 		.count(fifo_count_1)
 	);
 
-	reg_fifo reg_fifo_inst2(
+	reg_fifo_16 reg_fifo_inst2(
 		.clk(clk),
 		.reset_n(reset_n),
 		.Start(Start),
@@ -814,7 +814,7 @@ module input_layer_16# (
 	end
 
 
-	wire 				input_layer_1_valid;
+	wire 								input_layer_1_valid;
 	wire [STREAM_DATA_WIDTH-1:0] 		input_layer_1_data;
 
 	assign input_layer_1_valid = data_is_available | end_valid;
@@ -824,9 +824,10 @@ module input_layer_16# (
 	reg 			r_input_fifo_wr_en_p1;
 	reg 			r_input_fifo_wr_en_p2;
 
-	wire 	[7:0]   w_input_fifo_count;
- 	wire    [STREAM_DATA_WIDTH-1:0]  w_casted_vals;
- 	wire 			w_input_fifo_empty;
+
+	wire 	[7:0]   					w_input_fifo_count;
+ 	wire    [STREAM_DATA_WIDTH-1:0]  	w_casted_vals;
+ 	wire 								w_input_fifo_empty;
 
 	always @(posedge clk) begin : proc_r_input_fifo_wr_en
 		if(~reset_n || Start) begin
