@@ -52,7 +52,7 @@ module reg_fifo_16(
 	input Start, 
 	input one_row_complete,
 	input stride2en,
-	input [128:0] data_in,
+	input [127:0] data_in,
 	input [0:0] push,
 	input [0:0] pop,
 	output[47:0] data_o,
@@ -134,7 +134,7 @@ module reg_fifo_16(
 			4'b1000: w_reg_file <= {data_in[111:0], reg_file[127:16], data_in[127:112]};
 			4'b1001: w_reg_file <= {data_in[95:0], reg_file[143:32],  data_in[127:96]};
 			4'b1010: w_reg_file <= {data_in[79:0], reg_file[159:48],  data_in[127:80]};
-			4'b1011: w_reg_file <= {data_in[63:0], reg_file[174:64],  data_in[127:64]};
+			4'b1011: w_reg_file <= {data_in[63:0], reg_file[175:64],  data_in[127:64]};
 			4'b1100: w_reg_file <= {data_in[47:0], reg_file[191:80],  data_in[127:48]};
 			4'b1101: w_reg_file <= {data_in[31:0], reg_file[207:96],  data_in[127:32]};
 			4'b1110: w_reg_file <= {data_in[15:0], reg_file[123:112], data_in[127:16]};
