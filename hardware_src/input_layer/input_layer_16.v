@@ -379,9 +379,9 @@ module input_layer_16# (
 			if(~reset_n) begin
 				r_next_axi_address <= 0;
 			end else if(larger_block_en) begin
-				r_next_axi_address <= {r_next_inputlayer_id, 16'b0} + r_row_current_address_counter + axi_address;
+				r_next_axi_address <= {r_next_inputlayer_id, 17'b0} + r_row_current_address_counter + axi_address;
 			end else begin
-				r_next_axi_address <= {r_next_inputlayer_id, 12'b0} + r_row_current_address_counter + axi_address;
+				r_next_axi_address <= {r_next_inputlayer_id, 13'b0} + r_row_current_address_counter + axi_address;
 			end
 		end
 
@@ -850,76 +850,76 @@ module input_layer_16# (
 	end
 
 
-	int2float8 int2float8_inst_0(
+	int2float16 int2float16_inst_0(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[7:0]),
-		.out_fl8  	(w_casted_vals[7:0])
+		.int16_in 	(input_layer_1_data[15:0]),
+		.out_fl16  	(w_casted_vals[15:0])
 	);
 
-	int2float8 int2float8_inst_1(
+	int2float16 int2float16_inst_1(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[15:8]),
-		.out_fl8  	(w_casted_vals[15:8])
+		.int16_in 	(input_layer_1_data[31:16]),
+		.out_fl16  	(w_casted_vals[31:16])
 	);
 
-	int2float8 int2float8_inst_2(
+	int2float16 int2float16_inst_2(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[23:16]),
-		.out_fl8  	(w_casted_vals[23:16])
+		.int16_in 	(input_layer_1_data[47:32]),
+		.out_fl16  	(w_casted_vals[47:32])
 	);
 
-	int2float8 int2float8_inst_3(
+	int2float16 int2float16_inst_3(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[31:24]),
-		.out_fl8  	(w_casted_vals[31:24])
+		.int16_in 	(input_layer_1_data[63:48]),
+		.out_fl16  	(w_casted_vals[63:48])
 	);
 
-	int2float8 int2float8_inst_4(
+	int2float16 int2float16_inst_4(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[39:32]),
-		.out_fl8  	(w_casted_vals[39:32])
+		.int16_in 	(input_layer_1_data[79:64]),
+		.out_fl16  	(w_casted_vals[79:64])
 	);
 
-	int2float8 int2float8_inst_5(
+	int2float16 int2float16_inst_5(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[47:40]),
-		.out_fl8  	(w_casted_vals[47:40])
+		.int16_in 	(input_layer_1_data[95:80]),
+		.out_fl16  	(w_casted_vals[95:80])
 	);
 
-	int2float8 int2float8_inst_6(
+	int2float16 int2float16_inst_6(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[55:48]),
-		.out_fl8  	(w_casted_vals[55:48])
+		.int16_in 	(input_layer_1_data[111:96]),
+		.out_fl16  	(w_casted_vals[111:96])
 	);
 
-	int2float8 int2float8_inst_7(
+	int2float16 int2float16_inst_7(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[63:56]),
-		.out_fl8  	(w_casted_vals[63:56])
+		.int16_in 	(input_layer_1_data[127:112]),
+		.out_fl16  	(w_casted_vals[127:112])
 	);
 
-	int2float8 int2float8_inst_8(
+	int2float16 int2float16_inst_8(
 		.clk  		(clk),
 		.reset_n 	(reset_n),
 		.cast_ 		(cast_),
-		.int8_in 	(input_layer_1_data[71:64]),
-		.out_fl8  	(w_casted_vals[71:64])
+		.int16_in 	(input_layer_1_data[143:128]),
+		.out_fl16  	(w_casted_vals[143:128])
 	);
 
 	// input_fifo input_fifo_inst(
