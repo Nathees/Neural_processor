@@ -106,7 +106,7 @@ module input_layer_16# (
 	// Write Address Control Signals
 	assign M_axi_awid = 0;
 	assign M_axi_awlen = 8'h4;
-	assign M_axi_awsize = 3;
+	assign M_axi_awsize = 4;
 	assign M_axi_awburst = 1;
 	assign M_axi_awlock = 0;
 	assign M_axi_awcache = 4'b0011;
@@ -117,7 +117,7 @@ module input_layer_16# (
 	// Read Address Control Signals
 	assign M_axi_arid = 1;
 	assign M_axi_arlen = read_burst_len;
-	assign M_axi_arsize = 3;
+	assign M_axi_arsize = 4;
 	assign M_axi_arburst = 1;
 	assign M_axi_arlock = 0;
 	assign M_axi_arcache = 4'b0011;
@@ -263,8 +263,6 @@ module input_layer_16# (
 	//--------------------------------------------------------------------------------------------
 		reg [9:0] r_next_inputlayer_id;
 		reg [9:0] r_next_row_id;
-		reg [0:0] r_next_layer_row_fetched;
-		reg [0:0] r_current_layer_row_done;
 
 
 		always @(posedge clk) begin : proc_
@@ -304,8 +302,6 @@ module input_layer_16# (
 
 
 		// fetching rows one by one insted of fetching 3 rows in a burst
-
-		reg [7:0] r_eight_byte_algined_row_size;
 		reg [7:0] r_burst_per_row;
 		reg [7:0] r_burst_counter;
 		reg [9:0] r_allocated_space_per_row;
@@ -373,7 +369,6 @@ module input_layer_16# (
 		end
 
 		reg [31:0] r_next_axi_address;
-		reg [31:0] r_next_axi_address_offset;
 
 		always @(posedge clk) begin : proc_r_next_axi_address_offset
 			if(~reset_n) begin
@@ -460,7 +455,6 @@ module input_layer_16# (
 	reg wea_1;
 	reg wea_2;
 
-	reg[C_S_AXI_DATA_WIDTH-1:0] r_M_axi_rdata_0;
 	reg [C_S_AXI_DATA_WIDTH-1:0] r_M_axi_rdata;
 
 
@@ -709,14 +703,6 @@ module input_layer_16# (
 	// start ptoviding data with valid siginal if a row is fetched
 	wire data_is_available = (fifo_count_0 >= 3) && (fifo_count_1 >= 3) && (fifo_count_2 >= 3) && (data_in_blk_ram);
 
-	reg [1:0] r_row_select;
-	reg [7:0] rdaddress;
-
-	reg [7:0] r_read_ptr0;
-	reg [7:0] r_read_ptr1;
-	reg [7:0] r_read_ptr2;
-
-
 	wire w_fetch_data_fifo_0 = (fifo_count_0 <= 6) && data_in_blk_ram && ~(r_push0_0 | r_fetch_data_fifo_0) && ~layer_complete ? 1 : 0;
 	wire w_fetch_data_fifo_1 = (fifo_count_1 <= 6) && data_in_blk_ram && ~(r_push1_0 | r_fetch_data_fifo_1) && ~layer_complete ? 1 : 0;
 	wire w_fetch_data_fifo_2 = (fifo_count_2 <= 6) && data_in_blk_ram && ~(r_push2_0 | r_fetch_data_fifo_2) && ~layer_complete ? 1 : 0;
@@ -818,7 +804,7 @@ module input_layer_16# (
 	wire [STREAM_DATA_WIDTH-1:0] 		input_layer_1_data;
 
 	assign input_layer_1_valid = data_is_available | end_valid;
-	assign input_layer_1_data = (end_valid & ~stride2en) ?{8'b0,data_o_0[15:0], 8'b0,data_o_1[15:0], 8'b0, data_o_2[15:0]} : {data_o_0, data_o_1, data_o_2};
+	assign input_layer_1_data = (end_valid & ~stride2en) ?{16'b0,data_o_0[31:0], 16'b0,data_o_1[31:0], 16'b0, data_o_2[31:0]} : {data_o_0, data_o_1, data_o_2};
 
 	reg 			r_input_fifo_wr_en;
 	reg 			r_input_fifo_wr_en_p1;
