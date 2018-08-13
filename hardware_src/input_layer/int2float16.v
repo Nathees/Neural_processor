@@ -1,5 +1,5 @@
 
-module int2float8(
+module int2float16(
 	input				clk,
 	input 				reset_n,
 	input 				cast_,
@@ -35,7 +35,7 @@ module int2float8(
 
 
 	assign w_neg_magnitude_1 = (~(int16_in -1));
-	assign w_magnitude_1 = int16_in[15:15] ? w_neg_magnitude_1 ? int16_in[7:0];
+	assign w_magnitude_1 = int16_in[15:15] ? w_neg_magnitude_1 : int16_in[7:0];
 
 	always @(posedge clk) begin : proc_r_magnitude_1
 		if(~reset_n) begin
