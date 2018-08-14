@@ -204,12 +204,12 @@ module input_layer_16# (
 	// provide 3x3 window on each clockcycle moving 
 	// along a row
 	always @(posedge clk) begin : proc_r_col_postion_id
-		if(~reset_n | Start |r_layer_complete) begin
+		if(~reset_n || Start || r_layer_complete) begin
 			r_col_postion_id <= 0;
-		end else if(valid_transation && r_col_postion_id >= input_layer_col_size - 1)begin
+		end else if(valid_transation && r_col_almost_end)begin
 			r_col_postion_id <= 0;
-		end else if(valid_transation && stride2en) begin
-			r_col_postion_id <= r_col_postion_id + 1;
+		/*end else if(valid_transation && stride2en) begin
+			r_col_postion_id <= r_col_postion_id + 1;*/
 		end else if(valid_transation) begin
 			r_col_postion_id <= r_col_postion_id + 1;
 		end

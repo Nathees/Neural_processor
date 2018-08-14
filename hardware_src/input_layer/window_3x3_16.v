@@ -108,15 +108,19 @@ module reg_fifo_16(
 	always @(posedge clk) begin : proc_fifo_wptr
 		if(~reset_n) begin
 			w_ptr <= 1;
-			reg_file <= 0;
 		end else if((one_row_complete | Start) & stride2en) begin
 			w_ptr <= 0;
-			reg_file <= 0;
 		end else if((one_row_complete | Start)) begin
 			w_ptr <= 1;
-			reg_file <= 0;
 		end else if(push & can_be_pushed) begin
 			w_ptr <= w_ptr_next; 
+		end
+	end
+
+	always @(posedge clk) begin : proc_reg_file
+		if(~reset_n || one_row_complete || Start) begin
+			reg_file <= 0;
+		end else if(push & can_be_pushed) begin
 			reg_file <= w_reg_file;
 		end
 	end
@@ -137,7 +141,7 @@ module reg_fifo_16(
 			4'b1011: w_reg_file <= {data_in[63:0], reg_file[175:64],  data_in[127:64]};
 			4'b1100: w_reg_file <= {data_in[47:0], reg_file[191:80],  data_in[127:48]};
 			4'b1101: w_reg_file <= {data_in[31:0], reg_file[207:96],  data_in[127:32]};
-			4'b1110: w_reg_file <= {data_in[15:0], reg_file[123:112], data_in[127:16]};
+			4'b1110: w_reg_file <= {data_in[15:0], reg_file[223:112], data_in[127:16]};
 			default : w_reg_file <= reg_file;
 		endcase
 	end
