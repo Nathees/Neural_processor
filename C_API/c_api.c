@@ -432,7 +432,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int ker_3x3_size =  9 * No_of_input_layers* No_of_expand_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_0_offset, 1, ker_3x3_size ,f);
-			printf("\nCopying ker_3x3_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_0_offset, ker_3x3_size);
+			//printf("\nCopying ker_3x3_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_0_offset, ker_3x3_size);
 			fclose(f);
 		}
 
@@ -443,7 +443,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int ker_1x1_size =  1 * No_of_input_layers* No_of_expand_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_1_offset, 1, ker_1x1_size, f);
-			printf("\nCopying ker_1x1_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_1_offset, ker_1x1_size);
+			//printf("\nCopying ker_1x1_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_1_offset, ker_1x1_size);
 			fclose(f);
 		}
 
@@ -453,7 +453,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 			printf("Error: unable to open %s\n", file_name);
 		} else {
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_2_offset, 1, No_of_expand_kernels*2 ,f);
-			printf("\nCopying bias_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_2_offset, No_of_expand_kernels*2);
+			//printf("\nCopying bias_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_2_offset, No_of_expand_kernels*2);
 			fclose(f);
 		}
 
@@ -464,7 +464,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int sq_ker_size = 2*No_of_expand_kernels * No_of_squeeze_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_3_offset, 1, sq_ker_size,f);
-			printf("\nCopying sq_ker_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_3_offset, sq_ker_size);
+			//printf("\nCopying sq_ker_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_3_offset, sq_ker_size);
 			fclose(f);
 		}
 
@@ -475,7 +475,7 @@ int set_weights_in_ddr3(unsigned short layer_ID, unsigned char* ddr3_common, uns
 		} else {
 			unsigned int sq_bias_size = No_of_squeeze_kernels;
 			fread(ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_4_offset, 1, sq_bias_size,f);
-			printf("\nCopying sq_bias_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_4_offset, sq_bias_size);
+			//printf("\nCopying sq_bias_%d.bin data at %x size: %x\n", layer_ID, ddr3_common+ kernels_offset + kernels_space * layer_ID + kernel_4_offset, sq_bias_size);
 			fclose(f);
 		}
 }
@@ -493,6 +493,7 @@ int initialise_and_start_coprocessor(unsigned char* lw_AXI_offset, unsigned shor
 	unsigned int Record;
 	unsigned char* reg_axi_address;
 	unsigned char squ_repeat_en;
+	unsigned char cast_;
 
 	//-----------------------------------------------------------------------
 	//----------common paprameters and input layer--------------------------
@@ -544,8 +545,14 @@ int initialise_and_start_coprocessor(unsigned char* lw_AXI_offset, unsigned shor
 	//-----------Start Signal-----------------------------------------------
 	//----------------------------------------------------------------------
 
+	if(layer_ID == 0){
+		cast_ = 0;
+	} else {
+		cast_ = 0;
+	}
+
 	// 0x00000000 ------- 		 (byte0[0] == Start processing), (byte0[1] = max_pool_en), ((byte0[2] = expand_en), ((byte0[3] = in_layer_ddr3_data_rdy), (byte1 = layer_ID) , (byte2, byte3 = No_of_input_layers)
-		Record = ( 1 | (max_pool_en << 1) & 0x00000002) | ((expand_en << 2) & 0x00000004) | 0x00000008 | ((avg_pool_en <<5) &0x00000020)  | ((squ_repeat_en << 4) &0x00000010)  |((layer_ID << 8) & 0x0000ff00) | ((No_of_input_layers << 16) & 0xffff0000);
+		Record = ( 1 | (max_pool_en << 1) & 0x00000002) | ((expand_en << 2) & 0x00000004) | 0x00000008 | ((avg_pool_en <<5) &0x00000020) | ((cast_ <<6) &0x00000040)  | ((squ_repeat_en << 4) &0x00000010)  |((layer_ID << 8) & 0x0000ff00) | ((No_of_input_layers << 16) & 0xffff0000);
 		reg_axi_address = lw_AXI_offset + 0;
 		usleep(10);
 		memcpy(reg_axi_address, &Record, 4);
@@ -639,8 +646,8 @@ int main(void)
           unsigned short file_read_row_size = No_of_actual_input_cols % 4 == 0 ? No_of_actual_input_cols : (No_of_actual_input_cols/4 + 1) * 4;
 
           unsigned int in_layer_blk_size = No_of_actual_input_rows * No_of_actual_input_cols > 4096 ? 65536 : 4096;
-          printf("\nin_layer_blk_size: %d", in_layer_blk_size);
-          printf("\nin_allocated_space_per_row: %d", in_allocated_space_per_row);
+          //printf("\nin_layer_blk_size: %d", in_layer_blk_size);
+          //printf("\nin_allocated_space_per_row: %d", in_allocated_space_per_row);
           FILE *f = fopen("input_layer_c.bin", "rb");
 			for(k = 0; k < No_of_input_layers[0]; k++){
 			  for(i = 0; i < No_of_actual_input_rows; i++){
@@ -656,7 +663,7 @@ int main(void)
 
 
 		clock_t begin = clock();
-		for(frames =0; frames < 100; frames++){
+		for(frames =0; frames < 1; frames++){
 			No_of_actual_input_rows = 227;
 			No_of_actual_input_cols = 227;
 	        for(layer_ID = 0; layer_ID < No_of_Layers; layer_ID++){
@@ -729,7 +736,7 @@ int main(void)
 		}
 		clock_t end = clock();
 		double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-		printf("\nexecution clocks:%f time:%f : %d\n", (double)(end - begin), time_spent, CLOCKS_PER_SEC);
+		//printf("\nexecution clocks:%f time:%f : %d\n", (double)(end - begin), time_spent, CLOCKS_PER_SEC);
 					
           munmap(lw_addr, REG_SPAN);
           munmap(ddr3_common, DDR3_SPAN);
