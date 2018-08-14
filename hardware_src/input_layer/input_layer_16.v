@@ -160,6 +160,8 @@ module input_layer_16# (
 	reg [9:0] r_row_position_id;
 	reg [9:0] r_col_postion_id;
 	reg r_col_almost_end;
+	reg r_on_last_input_layer;
+	reg r_layer_complete;
 
 	always @(posedge clk) begin : proc_r_col_almost_end
 		if(~reset_n | Start) begin
@@ -173,10 +175,26 @@ module input_layer_16# (
 		end
 	end
 
+	always @(posedge clk) begin : proc_r_on_last_input_layer
+		if(~reset_n) begin
+			r_on_last_input_layer <= 0;
+		end else begin
+			r_on_last_input_layer <= (r_inputlayer_id >= no_of_input_layers - 1) ? 1 : 0;
+		end
+	end
+
 	wire valid_transation = input_layer_1_valid & r_input_fifo_wr_en;
 	wire one_row_complete = r_col_almost_end && valid_transation;
-	wire move_to_next_rows = (r_inputlayer_id >= no_of_input_layers - 1) && one_row_complete;
-	wire layer_complete = (r_row_position_id >= input_layer_row_size ? 1 : 0);
+	wire move_to_next_rows = r_on_last_input_layer && one_row_complete;
+	wire w_layer_complete = (r_row_position_id >= input_layer_row_size ? 1 : 0);
+
+	always @(posedge clk) begin : proc_r_layer_complete
+		if(~reset_n) begin
+			r_layer_complete <= 0;
+		end else begin
+			r_layer_complete <= w_layer_complete;
+		end
+	end
 
 
 //---------------------------------------------------------------------------------------------
@@ -186,7 +204,7 @@ module input_layer_16# (
 	// provide 3x3 window on each clockcycle moving 
 	// along a row
 	always @(posedge clk) begin : proc_r_col_postion_id
-		if(~reset_n | Start |layer_complete) begin
+		if(~reset_n | Start |r_layer_complete) begin
 			r_col_postion_id <= 0;
 		end else if(valid_transation && r_col_postion_id >= input_layer_col_size - 1)begin
 			r_col_postion_id <= 0;
@@ -200,7 +218,7 @@ module input_layer_16# (
 	// if a row completed move to same row 
 	// of next layer
 	always @(posedge clk) begin : proc_r_inputlayer_id
-		if(~reset_n | Start | layer_complete) begin
+		if(~reset_n || Start || r_layer_complete) begin
 			r_inputlayer_id <= 0;
 		end else if(one_row_complete && move_to_next_rows)begin
 			r_inputlayer_id <= 0;
@@ -263,13 +281,22 @@ module input_layer_16# (
 	//--------------------------------------------------------------------------------------------
 		reg [9:0] r_next_inputlayer_id;
 		reg [9:0] r_next_row_id;
+		reg [9:0] r_no_of_input_layer_sub_1;
+
+		always @(posedge clk) begin : proc_r_no_of_input_layer_sub_1
+			if(~reset_n) begin
+				r_no_of_input_layer_sub_1 <= 0;
+			end else begin
+				r_no_of_input_layer_sub_1 <= no_of_input_layers -1;
+			end
+		end
 
 
 		always @(posedge clk) begin : proc_
-			if(~reset_n | Start) begin
+			if(~reset_n || Start || (r_next_inputlayer_id >= r_no_of_input_layer_sub_1) && row_fetch_done) begin
 				r_next_inputlayer_id <= 0;
-			end else if((r_next_inputlayer_id >= no_of_input_layers -1) && row_fetch_done) begin
-				r_next_inputlayer_id <= 0;
+			//end else if((r_next_inputlayer_id >= no_of_input_layers -1) && row_fetch_done) begin
+			//	r_next_inputlayer_id <= 0;
 			end else if(row_fetch_done) begin
 				r_next_inputlayer_id <= r_next_inputlayer_id + 1;
 			end
@@ -703,9 +730,9 @@ module input_layer_16# (
 	// start ptoviding data with valid siginal if a row is fetched
 	wire data_is_available = (fifo_count_0 >= 3) && (fifo_count_1 >= 3) && (fifo_count_2 >= 3) && (data_in_blk_ram);
 
-	wire w_fetch_data_fifo_0 = (fifo_count_0 <= 6) && data_in_blk_ram && ~(r_push0_0 | r_fetch_data_fifo_0) && ~layer_complete ? 1 : 0;
-	wire w_fetch_data_fifo_1 = (fifo_count_1 <= 6) && data_in_blk_ram && ~(r_push1_0 | r_fetch_data_fifo_1) && ~layer_complete ? 1 : 0;
-	wire w_fetch_data_fifo_2 = (fifo_count_2 <= 6) && data_in_blk_ram && ~(r_push2_0 | r_fetch_data_fifo_2) && ~layer_complete ? 1 : 0;
+	wire w_fetch_data_fifo_0 = (fifo_count_0 <= 6) && data_in_blk_ram && ~(r_push0_0 | r_fetch_data_fifo_0) && ~r_layer_complete ? 1 : 0;
+	wire w_fetch_data_fifo_1 = (fifo_count_1 <= 6) && data_in_blk_ram && ~(r_push1_0 | r_fetch_data_fifo_1) && ~r_layer_complete ? 1 : 0;
+	wire w_fetch_data_fifo_2 = (fifo_count_2 <= 6) && data_in_blk_ram && ~(r_push2_0 | r_fetch_data_fifo_2) && ~r_layer_complete ? 1 : 0;
 
 	// state machine for fetch_data_fifo
 	reg [1:0] r_fetch_data_FSM;
