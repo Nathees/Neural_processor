@@ -728,7 +728,19 @@ module input_layer_16# (
 	);
 
 	// start ptoviding data with valid siginal if a row is fetched
+	reg r_data_is_available;
 	wire data_is_available = (fifo_count_0 >= 3) && (fifo_count_1 >= 3) && (fifo_count_2 >= 3) && (data_in_blk_ram);
+	always @(posedge clk) begin : proc_r_data_is_available
+		if(~reset_n || one_row_complete || Start) begin
+			r_data_is_available <= 0;
+		end else if((fifo_count_0 >= 4) && (fifo_count_1 >= 4) && (fifo_count_2 >= 4) && (data_in_blk_ram)) begin
+			r_data_is_available <= 1;
+		end else if((fifo_count_0 >= 3) && (fifo_count_1 >= 3) && (fifo_count_2 >= 3) && (data_in_blk_ram) && ~r_data_is_available) begin
+			r_data_is_available <= 1;
+		end else begin
+			r_data_is_available <= 0;
+		end
+	end
 
 	wire w_fetch_data_fifo_0 = (fifo_count_0 <= 6) && data_in_blk_ram && ~(r_push0_0 | r_fetch_data_fifo_0) && ~r_layer_complete ? 1 : 0;
 	wire w_fetch_data_fifo_1 = (fifo_count_1 <= 6) && data_in_blk_ram && ~(r_push1_0 | r_fetch_data_fifo_1) && ~r_layer_complete ? 1 : 0;
@@ -768,10 +780,10 @@ module input_layer_16# (
 	end
 
 	always@(posedge clk) begin
-		if(~reset_n | Start | r_feed_done) begin
+		if(~reset_n || Start || r_feed_done || one_row_complete) begin
 			addrb0 <= 8'h0;
-		end else if(one_row_complete) begin
-			addrb0 <= 8'h0;
+		/*end else if(one_row_complete) begin
+			addrb0 <= 8'h0;*/
 		end else if(r_fetch_data_fifo_0) begin
 			addrb0 <= addrb0 + 1;
 		end
@@ -779,10 +791,10 @@ module input_layer_16# (
 	assign w_addrb0 = {r_blk_read_offset_select, addrb0[5:0]};
 
 	always@(posedge clk) begin
-		if(~reset_n | Start | r_feed_done) begin
+		if(~reset_n || Start || r_feed_done || one_row_complete) begin
 			addrb1 <= 0;
-		end else if(one_row_complete) begin
-			addrb1 <= 0;
+		/*end else if(one_row_complete) begin
+			addrb1 <= 0;*/
 		end else if(r_fetch_data_fifo_1) begin
 			addrb1 <= addrb1 + 1;
 		end
@@ -790,10 +802,10 @@ module input_layer_16# (
 	assign w_addrb1 = {r_blk_read_offset_select, addrb1[5:0]};
 
 	always@(posedge clk) begin
-		if(~reset_n | Start | r_feed_done) begin
+		if(~reset_n || Start || r_feed_done || one_row_complete) begin
 			addrb2 <= 0;
-		end else if(one_row_complete) begin
-			addrb2 <= 0;
+		/*end else if(one_row_complete) begin
+			addrb2 <= 0;*/
 		end else if(r_fetch_data_fifo_2) begin
 			addrb2 <= addrb2 + 1;
 		end
@@ -830,7 +842,7 @@ module input_layer_16# (
 	wire 								input_layer_1_valid;
 	wire [STREAM_DATA_WIDTH-1:0] 		input_layer_1_data;
 
-	assign input_layer_1_valid = data_is_available | end_valid;
+	assign input_layer_1_valid = r_data_is_available | end_valid;
 	assign input_layer_1_data = (end_valid & ~stride2en) ?{16'b0,data_o_0[31:0], 16'b0,data_o_1[31:0], 16'b0, data_o_2[31:0]} : {data_o_0, data_o_1, data_o_2};
 
 	reg 			r_input_fifo_wr_en;
